@@ -8,27 +8,46 @@
         /* Import Film Noir-esque fonts */
         @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=IBM+Plex+Mono:wght@300;400;700&display=swap');
 
+        /* IMPORTANT FIX: Set html and body height and remove unnecessary overflow settings */
+        html {
+            height: 100%;
+        }
+
         body {
             margin: 0;
             font-family: 'IBM Plex Mono', monospace;
             color: #d0d0d0;
-            /* Main Game Background: Smokey Alley GIF */
+            /* REMOVED: min-height: 100vh; to allow content to push body height */
+            /* REMOVED: display: flex; flex-direction: column; justify-content: flex-start; */
+            
+            /* The body now stretches naturally with content */
+            min-height: 100%; /* Use 100% to ensure it fills the HTML space */
+            align-items: center;
+            text-align: center;
+            position: relative;
+            /* REMOVED: overflow: hidden; */
+            padding-bottom: 50px; /* Add bottom padding for safety */
+            
+            filter: grayscale(10%) contrast(110%);
+        }
+
+        /* --- Full-Screen Background Container for Scrolling Fix --- */
+        /* This fixed element will hold the GIF and overlay, ensuring they cover the viewport */
+        .background-fixed {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1; /* Place behind all content */
             background-image: url('https://i.imgur.com/iqioKnE.gif');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            align-items: center;
-            min-height: 100vh;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-            filter: grayscale(10%) contrast(110%);
         }
 
-        body::before {
+        /* Overlay is now inside the fixed background container */
+        .background-fixed::before {
             content: '';
             position: absolute;
             top: 0;
@@ -38,7 +57,7 @@
             background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.8) 100%);
             z-index: 1;
         }
-
+        
         /* --- Title Styling (Moved to top) --- */
         .title-bar {
             position: relative;
@@ -65,13 +84,11 @@
         .main-content {
             position: relative;
             z-index: 2;
-            flex-grow: 1;
-            display: flex;
+            display: flex; /* Keeping flex for centering the initial button */
             flex-direction: column;
-            justify-content: center;
             align-items: center;
             width: 100%;
-            /* No bottom padding needed now that the button container has a fixed size */
+            padding-top: 50px; /* Add padding below the fixed title bar */
         }
 
         /* --- Case File Styling --- */
@@ -106,7 +123,6 @@
             color: #FFAC47;
             font-weight: 700;
         }
-
 
         /* --- Button Styling --- */
         .btn {
@@ -143,33 +159,32 @@
             margin-top: 150px;
         }
 
-        /* --- NEW: Button Container for smooth transition --- */
-        /* This container reserves space for the 'Start Investigation' button */
+        /* --- Button Container for smooth transition --- */
         .investigation-button-container {
-            height: 100px; /* Fixed height large enough for the button + margin */
+            height: 100px;
             margin-top: 20px;
             display: flex;
             justify-content: center;
             align-items: center;
-            /* Add transition to margin-top if needed, but height stabilizes the flow */
         }
         
-        /* Style the 'Start Investigation' button to transition smoothly */
         #startEvidenceBtn {
             opacity: 0;
             transform: scale(0.8);
             transition: opacity 1s ease-in, transform 1s ease-in;
-            pointer-events: none; /* Disable clicks until fully visible */
+            pointer-events: none;
         }
         
         #startEvidenceBtn.show {
             opacity: 1;
             transform: scale(1);
-            pointer-events: auto; /* Enable clicks */
+            pointer-events: auto;
         }
     </style>
 </head>
 <body>
+    <div class="background-fixed"></div>
+
     <div class="title-bar">
         <h1>The Case of the Silver Serpent 🐍</h1>
     </div>
@@ -217,7 +232,6 @@
             
             // 3. Reveal the 'Start Investigation' button after the case file transition finishes (2 seconds)
             setTimeout(() => {
-                // Now, reveal the button using CSS class for a smooth scale/opacity transition
                 startBtn.classList.add('show');
             }, 2000); 
         }
