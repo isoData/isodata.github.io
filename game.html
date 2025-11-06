@@ -19,7 +19,7 @@
             background-repeat: no-repeat;
             display: flex;
             flex-direction: column;
-            justify-content: flex-start; /* Start elements from the top */
+            justify-content: flex-start;
             align-items: center;
             min-height: 100vh;
             text-align: center;
@@ -45,7 +45,7 @@
             z-index: 2;
             width: 100%;
             padding: 20px 0;
-            background-color: rgba(0, 0, 0, 0.7); /* Subtle dark header */
+            background-color: rgba(0, 0, 0, 0.7);
             border-bottom: 2px solid #FFAC47;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.8);
         }
@@ -68,10 +68,10 @@
             flex-grow: 1;
             display: flex;
             flex-direction: column;
-            justify-content: center; /* Center content vertically in the remaining space */
+            justify-content: center;
             align-items: center;
             width: 100%;
-            padding-bottom: 50px; /* Space for hidden elements */
+            /* No bottom padding needed now that the button container has a fixed size */
         }
 
         /* --- Case File Styling --- */
@@ -83,11 +83,11 @@
             background-color: rgba(0, 0, 0, 0.7);
             text-align: left;
             margin-top: 30px;
-            /* Initially hidden and structured for unfolding */
+            
             display: none;
             opacity: 0;
             transform: translateY(20px);
-            transition: opacity 2s ease-out, transform 2s ease-out; /* Slow visual effect */
+            transition: opacity 2s ease-out, transform 2s ease-out; 
         }
         
         .case-file.visible {
@@ -120,7 +120,7 @@
             font-family: 'IBM Plex Mono', monospace;
             font-size: 1.3em;
             cursor: pointer;
-            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
             box-shadow: 4px 4px 0px #000;
             letter-spacing: 1px;
             text-transform: uppercase;
@@ -142,11 +142,30 @@
         #openCaseBtn {
             margin-top: 150px;
         }
+
+        /* --- NEW: Button Container for smooth transition --- */
+        /* This container reserves space for the 'Start Investigation' button */
+        .investigation-button-container {
+            height: 100px; /* Fixed height large enough for the button + margin */
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* Add transition to margin-top if needed, but height stabilizes the flow */
+        }
         
-        /* Hide the navigation button initially */
+        /* Style the 'Start Investigation' button to transition smoothly */
         #startEvidenceBtn {
-            display: none;
-            margin-top: 40px;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: opacity 1s ease-in, transform 1s ease-in;
+            pointer-events: none; /* Disable clicks until fully visible */
+        }
+        
+        #startEvidenceBtn.show {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: auto; /* Enable clicks */
         }
     </style>
 </head>
@@ -174,7 +193,9 @@
             </ul>
         </div>
         
-        <a href="stage_2_investigation.html" id="startEvidenceBtn" class="btn">Start Investigation</a>
+        <div class="investigation-button-container">
+            <a href="stage_2_investigation.html" id="startEvidenceBtn" class="btn">Start Investigation</a>
+        </div>
 
     </div>
 
@@ -190,15 +211,15 @@
             // 2. Make the case file visible (triggering the transition)
             caseFile.style.display = 'block';
             
-            // Give a slight delay before adding the 'visible' class to ensure CSS transition works
             setTimeout(() => {
                 caseFile.classList.add('visible');
-            }, 50); // Small delay
+            }, 50); 
             
-            // 3. Reveal the 'Start Investigation' button after the transition finishes (2 seconds)
+            // 3. Reveal the 'Start Investigation' button after the case file transition finishes (2 seconds)
             setTimeout(() => {
-                startBtn.style.display = 'inline-block';
-            }, 2000); // Wait for the case file transition to complete
+                // Now, reveal the button using CSS class for a smooth scale/opacity transition
+                startBtn.classList.add('show');
+            }, 2000); 
         }
     </script>
 </body>
