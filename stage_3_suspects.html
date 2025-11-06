@@ -138,9 +138,9 @@
             margin-top: 10px;
         }
         
-        /* --- Feedback Modal --- */
+        /* --- Feedback Modal FIX --- */
         .feedback-modal {
-            display: none; 
+            display: none; /* Hidden by default */
             position: fixed; 
             z-index: 100;
             left: 0;
@@ -148,13 +148,17 @@
             width: 100%;
             height: 100%;
             background-color: rgba(0, 0, 0, 0.95);
-            padding-top: 150px;
+            /* Centering fix: Use Flexbox to align content */
+            justify-content: center;
+            align-items: center;
             animation: fadeIn 0.5s;
+            /* Removed padding-top: 150px; to allow true vertical centering */
         }
 
         .feedback-content {
             background-color: #3A1A1A; /* Reddish Dark Background for urgency/failure */
-            margin: auto;
+            /* Use margin for safe spacing, but Flexbox handles primary centering */
+            margin: 20px;
             padding: 40px;
             border: 3px solid #FF3333; /* Red Border */
             width: 80%;
@@ -291,7 +295,8 @@
                 retryBtn.style.display = 'inline-block';
             }
 
-            modal.style.display = 'block';
+            // FIX: Use 'flex' here to activate the Flexbox centering
+            modal.style.display = 'flex';
         }
 
         // --- Modal Control ---
@@ -304,14 +309,17 @@
             const modal = document.getElementById('feedbackModal');
             const content = document.getElementById('feedbackContent');
             
-            // 1. Check if the modal is currently visible
-            if (modal.style.display === 'block') {
+            // 1. Check if the modal is currently visible (using 'flex' now)
+            if (modal.style.display === 'flex') {
                 
                 // 2. Check if we are in the FAILURE state (content box does NOT have the 'correct' class)
                 if (!content.classList.contains('correct')) {
                     
-                    // 3. If in FAILURE state, close the modal on any click inside its boundary (overlay or content).
-                    if (modal.contains(event.target)) {
+                    // 3. If in FAILURE state, close the modal on any click on the overlay.
+                    // We specifically check if the click target IS the modal itself (the overlay)
+                    // or if it contains the modal content (since we still want the button to work)
+                    // The 'Try Again' button also explicitly calls closeModal().
+                    if (event.target === modal) {
                         closeModal();
                     }
                 }
