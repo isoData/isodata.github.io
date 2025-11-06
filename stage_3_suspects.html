@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stage 3: The Suspects</title>
+    <style>
+        /* Shared Styles for Stage Pages */
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=IBM+Plex+Mono:wght@300;400;700&display=swap');
+
+        body {
+            margin: 0; font-family: 'IBM Plex Mono', monospace; color: #d0d0d0;
+            background-color: #1A233A; /* Plain Dark Blue Background */
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            min-height: 100vh; padding: 20px;
+        }
+        .container {
+            padding: 40px; max-width: 700px; border: 2px solid #FFAC47;
+            background-color: rgba(0, 0, 0, 0.85); box-shadow: 0 0 30px rgba(0, 0, 0, 1);
+            text-align: left;
+        }
+        h2 {
+            font-family: 'Cinzel Decorative', cursive; color: #FFAC47;
+            text-transform: uppercase; border-bottom: 1px solid #666;
+            padding-bottom: 10px; margin-bottom: 30px; text-align: center;
+        }
+        .instruction { text-align: center; margin-bottom: 40px; font-size: 1.2em; color: #f0f0f0; }
+        .suspect { 
+            margin-bottom: 25px; 
+            padding: 15px; 
+            border: 1px solid #333; 
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        .suspect-name { font-size: 1.4em; color: #FFAC47; margin-bottom: 5px; }
+        .motive { margin: 5px 0; }
+        .supporting-fact { font-style: italic; color: #aaa; margin-top: 5px; }
+        strong { color: #FFAC47; }
+        .btn { /* Go Back Button Styling */
+            display: inline-block; background-color: #333; color: #f0f0f0; padding: 10px 20px;
+            border: 2px solid #666; border-radius: 0; text-decoration: none;
+            font-family: 'IBM Plex Mono', monospace; margin-top: 30px;
+            box-shadow: 3px 3px 0px #000;
+        }
+        .btn:hover { background-color: #444; color: #FFAC47; border-color: #FFAC47; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Stage 3: The Suspects 🤔</h2>
+        <p class="instruction">Time to choose the killer based on Motive, Means, and Opportunity.</p>
+
+        <div class="suspect">
+            <div class="suspect-name">Vito 'The Hammer' Moretti 🔨</div>
+            <div class="motive"><strong>Motive:</strong> Silence a witness.</div>
+            <div class="supporting-fact">Supporting Fact: Pro hit, silenced gun fits the MO.</div>
+        </div>
+
+        <div class="suspect">
+            <div class="suspect-name">Sal 'The Quick' Ricci 💸</div>
+            <div class="motive"><strong>Motive:</strong> Stolen money revenge.</div>
+            <div class="supporting-fact">Supporting Fact: Fought with Thorne, suddenly appeared wealthy.</div>
+        </div>
+        
+        <div class="suspect">
+            <div class="suspect-name">Ms. Evelyn Reed 🏦</div>
+            <div class="motive"><strong>Motive:</strong> Huge debt collection.</div>
+            <div class="supporting-fact">Supporting Fact: Private lender with potential connections to enforce payment.</div>
+        </div>
+
+        <div class="suspect">
+            <div class="suspect-name">Mickey (Clara's Ex) 🤫</div>
+            <div class="motive"><strong>Motive:</strong> Jealousy/Control.</div>
+            <div class="supporting-fact">Supporting Fact: Quiet killer, obsessed with the necklace/Clara.</div>
+        </div>
+
+        <a href="game.html" class="btn">Return to Stages</a>
+    </div>
+</body>
+</html>
