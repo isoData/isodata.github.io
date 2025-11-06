@@ -204,9 +204,9 @@
             .suspect-grid { grid-template-columns: 1fr; }
             .feedback-content { width: 90%; padding: 25px; }
             
-            /* FIX: Increase horizontal padding of the main container to ensure box-shadow is fully visible */
+            /* FIX: Increased side padding significantly to ensure box-shadow (7px offset) is fully visible */
             .main-content {
-                padding: 30px 25px; 
+                padding: 30px 40px; 
             }
         }
     </style>
@@ -311,12 +311,10 @@
                 if (!content.classList.contains('correct')) {
                     
                     // 3. If in FAILURE state, close the modal on any click inside its boundary (overlay or content).
-                    // The 'Try Again' button already calls closeModal() explicitly, but this handles the rest of the box.
                     if (modal.contains(event.target)) {
                         closeModal();
                     }
                 }
-                // If in the SUCCESS state, we do nothing here, forcing the user to click the 'View Conclusion' link/button.
             }
         }
     </script>
