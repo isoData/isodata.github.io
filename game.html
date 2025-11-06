@@ -17,29 +17,28 @@
             margin: 0;
             font-family: 'IBM Plex Mono', monospace;
             color: #d0d0d0;
-            /* REMOVED: min-height: 100vh; to allow content to push body height */
-            /* REMOVED: display: flex; flex-direction: column; justify-content: flex-start; */
-            
-            /* The body now stretches naturally with content */
-            min-height: 100%; /* Use 100% to ensure it fills the HTML space */
+            min-height: 100%;
             align-items: center;
             text-align: center;
             position: relative;
-            /* REMOVED: overflow: hidden; */
-            padding-bottom: 50px; /* Add bottom padding for safety */
-            
+            padding-bottom: 50px;
             filter: grayscale(10%) contrast(110%);
         }
 
+        /* --- FADE IN ANIMATIONS (New) --- */
+        @keyframes fadeInMove {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
         /* --- Full-Screen Background Container for Scrolling Fix --- */
-        /* This fixed element will hold the GIF and overlay, ensuring they cover the viewport */
         .background-fixed {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: -1; /* Place behind all content */
+            z-index: -1;
             background-image: url('https://i.imgur.com/iqioKnE.gif');
             background-size: cover;
             background-position: center;
@@ -67,6 +66,10 @@
             background-color: rgba(0, 0, 0, 0.7);
             border-bottom: 2px solid #FFAC47;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.8);
+            
+            /* NEW: Initial hidden state and animation */
+            opacity: 0;
+            animation: fadeInMove 2s ease-out 0.5s forwards;
         }
 
         h1 {
@@ -130,7 +133,8 @@
             background-color: #333;
             color: #f0f0f0;
             padding: 18px 35px;
-            border: 2px solid #666;
+            /* UPDATED: Thicker gold border to match index.html */
+            border: 3px solid #FFAC47; 
             border-radius: 0;
             text-decoration: none;
             font-family: 'IBM Plex Mono', monospace;
@@ -156,7 +160,11 @@
         
         /* Specific styling for the initial trigger button */
         #openCaseBtn {
-            margin-top: 150px;
+            margin-top: 100px;
+            /* NEW: Apply fade-in animation */
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInMove 1.5s ease-out 2.5s forwards; /* Starts after title animation is done */
         }
 
         /* --- Button Container for smooth transition --- */
@@ -191,6 +199,7 @@
 
     <div class="main-content">
         
+        <!-- Open Case Button: Now fades in with CSS animation -->
         <button id="openCaseBtn" class="btn" onclick="unfoldCase()">Open the Case</button>
 
         <div id="caseFile" class="case-file">
