@@ -203,6 +203,11 @@
             h1 { font-size: 1.8em; }
             .suspect-grid { grid-template-columns: 1fr; }
             .feedback-content { width: 90%; padding: 25px; }
+            
+            /* FIX: Increase horizontal padding of the main container to ensure box-shadow is fully visible */
+            .main-content {
+                padding: 30px 25px; 
+            }
         }
     </style>
 </head>
@@ -231,7 +236,7 @@
             <div class="suspect-card" onclick="selectSuspect('Sal Ricci')">
                 <h3>Sal 'The Quick' Ricci 💸</h3>
                 <p><strong>Motive:</strong> Stolen money revenge.</p>
-                <p class="fact">Supporting Fact: Fought with Thorne, suddenly appeared wealthy.</p>
+                <p>Supporting Fact: Fought with Thorne, suddenly appeared wealthy.</p>
             </div>
 
             <div class="suspect-card" onclick="selectSuspect('Evelyn Reed')">
@@ -271,14 +276,14 @@
             const retryBtn = document.getElementById('tryAgainBtn');
 
             if (suspectName === CORRECT_KILLER) {
-                // Correct Choice
+                // Correct Choice (Success State)
                 content.classList.add('correct');
                 title.textContent = "CASE CRACKED!";
                 message.textContent = `You correctly identified ${suspectName} as the killer. Your meticulous work has paid off, Detective. Time for the final reveal.`;
                 nextBtn.style.display = 'inline-block';
                 retryBtn.style.display = 'none';
             } else {
-                // Incorrect Choice
+                // Incorrect Choice (Failure State)
                 content.classList.remove('correct');
                 title.textContent = "WRONG CALL, DETECTIVE.";
                 message.textContent = `You targeted ${suspectName}. The evidence doesn't quite line up. Thorne's last clue points elsewhere. You missed a vital piece of the puzzle. Review the evidence and try again.`;
@@ -294,10 +299,24 @@
             document.getElementById('feedbackModal').style.display = 'none';
         }
 
-        // Close modal if user clicks outside
+        // Close modal on any click if the guess was INCORRECT
         window.onclick = function(event) {
-            if (event.target === document.getElementById('feedbackModal')) {
-                closeModal();
+            const modal = document.getElementById('feedbackModal');
+            const content = document.getElementById('feedbackContent');
+            
+            // 1. Check if the modal is currently visible
+            if (modal.style.display === 'block') {
+                
+                // 2. Check if we are in the FAILURE state (content box does NOT have the 'correct' class)
+                if (!content.classList.contains('correct')) {
+                    
+                    // 3. If in FAILURE state, close the modal on any click inside its boundary (overlay or content).
+                    // The 'Try Again' button already calls closeModal() explicitly, but this handles the rest of the box.
+                    if (modal.contains(event.target)) {
+                        closeModal();
+                    }
+                }
+                // If in the SUCCESS state, we do nothing here, forcing the user to click the 'View Conclusion' link/button.
             }
         }
     </script>
