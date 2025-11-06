@@ -19,7 +19,7 @@
             background-repeat: no-repeat;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: flex-start; /* Start elements from the top */
             align-items: center;
             min-height: 100vh;
             text-align: center;
@@ -39,82 +39,167 @@
             z-index: 1;
         }
 
-        .container {
+        /* --- Title Styling (Moved to top) --- */
+        .title-bar {
             position: relative;
             z-index: 2;
-            padding: 30px 40px;
-            max-width: 800px;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            background-color: rgba(0, 0, 0, 0.6);
-            box-shadow: 0 0 25px rgba(0, 0, 0, 1.0);
+            width: 100%;
+            padding: 20px 0;
+            background-color: rgba(0, 0, 0, 0.7); /* Subtle dark header */
+            border-bottom: 2px solid #FFAC47;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.8);
         }
 
-        h2 {
+        h1 {
             font-family: 'Cinzel Decorative', cursive;
             font-weight: 700;
             font-size: 2.5em;
-            margin-bottom: 30px;
-            color: #FFAC47;
-            text-shadow: 0 0 8px rgba(255, 172, 71, 0.5);
+            margin: 0;
+            color: #f0f0f0;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.3), 0 0 20px rgba(0, 0, 0, 0.9);
             letter-spacing: 2px;
             text-transform: uppercase;
-            border-bottom: 1px dashed #666;
-            padding-bottom: 15px;
-        }
-        
-        h3 {
-             font-family: 'IBM Plex Mono', monospace;
-             font-size: 1.4em;
-             color: #d0d0d0;
-             margin-top: 30px;
         }
 
-        .choices {
-            margin-top: 30px;
+        /* --- Main Content Area --- */
+        .main-content {
+            position: relative;
+            z-index: 2;
+            flex-grow: 1;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            justify-content: center; /* Center content vertically in the remaining space */
+            align-items: center;
+            width: 100%;
+            padding-bottom: 50px; /* Space for hidden elements */
         }
 
+        /* --- Case File Styling --- */
+        .case-file {
+            width: 90%;
+            max-width: 650px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background-color: rgba(0, 0, 0, 0.7);
+            text-align: left;
+            margin-top: 30px;
+            /* Initially hidden and structured for unfolding */
+            display: none;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 2s ease-out, transform 2s ease-out; /* Slow visual effect */
+        }
+        
+        .case-file.visible {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .case-file p {
+            font-size: 1.1em;
+            line-height: 1.7;
+            margin-bottom: 20px;
+        }
+        
+        .case-file strong {
+            color: #FFAC47;
+            font-weight: 700;
+        }
+
+
+        /* --- Button Styling --- */
         .btn {
             display: inline-block;
             background-color: #333;
             color: #f0f0f0;
-            padding: 15px 30px;
+            padding: 18px 35px;
             border: 2px solid #666;
             border-radius: 0;
             text-decoration: none;
             font-family: 'IBM Plex Mono', monospace;
-            font-size: 1.1em;
+            font-size: 1.3em;
             cursor: pointer;
             transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-            box-shadow: 3px 3px 0px #000;
+            box-shadow: 4px 4px 0px #000;
             letter-spacing: 1px;
             text-transform: uppercase;
-            width: 80%; /* Adjusted for better stacking appearance */
-            margin: 0 auto;
         }
 
         .btn:hover {
             background-color: #444;
             color: #FFAC47;
             border-color: #FFAC47;
-            box-shadow: 4px 4px 0px #000;
+            box-shadow: 6px 6px 0px #000;
+        }
+
+        .btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0px #000;
+        }
+        
+        /* Specific styling for the initial trigger button */
+        #openCaseBtn {
+            margin-top: 150px;
+        }
+        
+        /* Hide the navigation button initially */
+        #startEvidenceBtn {
+            display: none;
+            margin-top: 40px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>The Case of the Silver Serpent 🐍</h2>
-        <p>A new, dangerous case has landed on your desk. Follow the leads, collect the evidence, and name the killer before the trail runs cold.</p>
-        
-        <h3>Stage Selection</h3>
-        <div class="choices">
-            <a href="stage_1_office.html" class="btn">Stage 1: Case Introduction (Your Office) 💼</a>
-            <a href="stage_2_investigation.html" class="btn">Stage 2: Evidence Collection 🔎</a>
-            <a href="stage_3_suspects.html" class="btn">Stage 3: The Suspects 🤔</a>
-            <a href="stage_4_reveal.html" class="btn">Stage 4: The Conclusion (The Reveal) 🚨</a>
-        </div>
+    <div class="title-bar">
+        <h1>The Case of the Silver Serpent 🐍</h1>
     </div>
+
+    <div class="main-content">
+        
+        <button id="openCaseBtn" class="btn" onclick="unfoldCase()">Open the Case</button>
+
+        <div id="caseFile" class="case-file">
+            <h2>Case Briefing: Elias Thorne</h2>
+            <p>The **Rain 🌧️** is a cruel curtain over the city. Detective Murphy from Homicide stands opposite you, his face etched with familiar worry lines.</p>
+            
+            <p>"The victim is **Elias 'The Serpent' Thorne** 🐍. Mob bookie. Found him in his penthouse. One shot, clean and quiet. Looks professional, but his safe is untouched. He was about to testify against Vito Moretti. The only thing weird? He was clutching a **broken silver earring** 👂."</p>
+
+            <h3>Initial Clues</h3>
+            <ul>
+                <li><strong>Victim:</strong> Elias 'The Serpent' Thorne (Mob witness)</li>
+                <li><strong>Cause of Death:</strong> Single, silenced shot 🔫</li>
+                <li><strong>Key Clue:</strong> A broken silver earring 👂</li>
+                <li><strong>Complication:</strong> Thorne was set to betray Vito 'The Hammer' Moretti 🔨</li>
+            </ul>
+        </div>
+        
+        <a href="stage_2_investigation.html" id="startEvidenceBtn" class="btn">Start Investigation</a>
+
+    </div>
+
+    <script>
+        function unfoldCase() {
+            const openBtn = document.getElementById('openCaseBtn');
+            const caseFile = document.getElementById('caseFile');
+            const startBtn = document.getElementById('startEvidenceBtn');
+            
+            // 1. Hide the initial button
+            openBtn.style.display = 'none';
+            
+            // 2. Make the case file visible (triggering the transition)
+            caseFile.style.display = 'block';
+            
+            // Give a slight delay before adding the 'visible' class to ensure CSS transition works
+            setTimeout(() => {
+                caseFile.classList.add('visible');
+            }, 50); // Small delay
+            
+            // 3. Reveal the 'Start Investigation' button after the transition finishes (2 seconds)
+            setTimeout(() => {
+                startBtn.style.display = 'inline-block';
+            }, 2000); // Wait for the case file transition to complete
+        }
+    </script>
 </body>
 </html>
