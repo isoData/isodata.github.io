@@ -5,82 +5,398 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stage 2: Evidence Collection</title>
     <style>
-        /* Shared Styles for Stage Pages */
+        /* Import Film Noir-esque fonts */
         @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=IBM+Plex+Mono:wght@300;400;700&display=swap');
 
+        html { height: 100%; }
+
         body {
-            margin: 0; font-family: 'IBM Plex Mono', monospace; color: #d0d0d0;
-            background-color: #1A233A; /* Plain Dark Blue Background */
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            min-height: 100vh; padding: 20px;
+            margin: 0;
+            font-family: 'IBM Plex Mono', monospace;
+            color: #d0d0d0;
+            min-height: 100%;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            padding-bottom: 50px;
+            filter: grayscale(10%) contrast(110%);
         }
-        .container {
-            padding: 40px; max-width: 900px; border: 2px solid #FFAC47;
-            background-color: rgba(0, 0, 0, 0.85); box-shadow: 0 0 30px rgba(0, 0, 0, 1);
+
+        /* --- Full-Screen Background Container (from game.html) --- */
+        .background-fixed {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background-image: url('https://i.imgur.com/iqioKnE.gif'); /* Same as game.html */
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .background-fixed::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.8) 100%);
+            z-index: 1;
+        }
+        
+        /* --- Title Styling --- */
+        .title-bar {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            padding: 20px 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-bottom: 2px solid #FFAC47;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.8);
+        }
+
+        h1 {
+            font-family: 'Cinzel Decorative', cursive;
+            font-weight: 700;
+            font-size: 2.5em;
+            margin: 0;
+            color: #f0f0f0;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.3), 0 0 20px rgba(0, 0, 0, 0.9);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* --- Main Content Area --- */
+        .main-content {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 30px 20px;
+            box-sizing: border-box;
+        }
+
+        /* --- Evidence Box Grid --- */
+        .location-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-top: 40px;
+        }
+
+        .location-box {
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 25px;
+            border: 3px solid #666; /* Default Border */
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 5px 5px 0px rgba(0, 0, 0, 0.8);
+            border-radius: 4px;
+        }
+
+        .location-box:hover {
+            border-color: #FFAC47;
+            background-color: rgba(26, 35, 58, 0.9); /* Dark Blue Hint on Hover */
+            transform: translateY(-2px);
+            box-shadow: 7px 7px 0px rgba(0, 0, 0, 0.8);
+        }
+
+        /* Visited State */
+        .location-box.visited {
+            border-color: #4CAF50; /* Green outline for visited */
+            background-color: rgba(76, 175, 80, 0.1);
+        }
+
+        .location-box h3 {
+            font-family: 'Cinzel Decorative', cursive;
+            color: #f0f0f0;
+            margin: 0 0 10px 0;
+            font-size: 1.5em;
+        }
+
+        .location-box p {
+            font-size: 0.9em;
+            color: #aaa;
+            margin: 0;
+        }
+        
+        /* --- Modal (Evidence Window) --- */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            padding-top: 50px;
+            animation: fadeIn 0.5s;
+        }
+
+        .modal-content {
+            background-color: rgba(26, 35, 58, 0.95);
+            margin: 5% auto;
+            padding: 40px;
+            border: 3px solid #FFAC47;
+            width: 80%;
+            max-width: 600px;
+            position: relative;
+            box-shadow: 0 0 40px #FFAC4733;
             text-align: left;
+            animation: slideDown 0.5s;
         }
-        h2 {
-            font-family: 'Cinzel Decorative', cursive; color: #FFAC47;
-            text-transform: uppercase; border-bottom: 1px solid #666;
-            padding-bottom: 10px; margin-bottom: 30px; text-align: center;
+
+        .close-btn {
+            color: #FFAC47;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.2s;
         }
-        h3 { color: #f0f0f0; margin-top: 30px; border-bottom: 1px dashed #333; padding-bottom: 5px; }
-        .location { margin-bottom: 40px; padding: 15px; border: 1px solid rgba(255, 255, 255, 0.1); }
-        .location p { margin-top: 0; font-style: italic; color: #aaa; }
-        .findings li { margin-bottom: 10px; }
-        strong { color: #FFAC47; }
-        .btn { /* Go Back Button Styling */
-            display: inline-block; background-color: #333; color: #f0f0f0; padding: 10px 20px;
+
+        .close-btn:hover,
+        .close-btn:focus {
+            color: #fff;
+            text-decoration: none;
+        }
+
+        #modalTitle {
+            font-family: 'Cinzel Decorative', cursive;
+            color: #FFAC47;
+            margin-top: 0;
+        }
+
+        #modalFindings li {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+            padding-bottom: 5px;
+        }
+
+        /* --- Next Stage Button (Initially Hidden) --- */
+        #nextStageBox {
+            background-color: rgba(255, 172, 71, 0.2);
+            padding: 30px;
+            margin-top: 50px;
+            border: 3px solid #FFAC47;
+            text-align: center;
+            opacity: 0;
+            transform: scale(0.9);
+            transition: all 0.5s ease-out;
+            pointer-events: none;
+            cursor: pointer;
+            width: 80%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        #nextStageBox.visible {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: auto;
+        }
+        
+        .btn { /* General Button Styling from game.html */
+            display: inline-block; background-color: #333; color: #f0f0f0; padding: 18px 35px;
             border: 2px solid #666; border-radius: 0; text-decoration: none;
-            font-family: 'IBM Plex Mono', monospace; margin-top: 30px;
-            box-shadow: 3px 3px 0px #000;
+            font-family: 'IBM Plex Mono', monospace; margin-top: 20px;
+            box-shadow: 4px 4px 0px #000; letter-spacing: 1px; text-transform: uppercase;
         }
         .btn:hover { background-color: #444; color: #FFAC47; border-color: #FFAC47; }
+        .btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0px #000; }
+
+        /* --- Animations --- */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideDown {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            h1 { font-size: 1.8em; }
+            .modal-content { width: 90%; margin: 10% auto; padding: 25px; }
+            .location-box h3 { font-size: 1.2em; }
+            .location-grid { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Stage 2: Evidence Collection 🔎</h2>
-        <p>You hit the street to turn over every rock and see what crawls out. Here's what the evidence tells you:</p>
+    <!-- Fixed Background Element -->
+    <div class="background-fixed"></div>
 
-        <div class="location">
-            <h3>Crime Scene (Thorne's Penthouse) 🔎</h3>
-            <p>Setting: Super clean penthouse. You check the hidden spots.</p>
-            <ul class="findings">
-                <li>Behind a mirror, you find a hidden drawer with a small, burned mark: a **stylized J 🔥**.</li>
-                <li>In a Bible, you find a faded photograph of Thorne and a young woman. The note on the back says: **‘The money is safe. – E.’ 💰**.</li>
-            </ul>
-        </div>
-        
-        <div class="location">
-            <h3>Police Precinct (Homicide Desk) 🚨</h3>
-            <p>Setting: Murphy gives you 5 minutes with the file.</p>
-            <ul class="findings">
-                <li>Thorne had a huge, secret debt to private lender **Ms. Evelyn Reed** 📄.</li>
-                <li>He was recently paranoid, reporting that someone stole his **silver necklace ⛓️** and was using it to 'track' him.</li>
-            </ul>
-        </div>
-
-        <div class="location">
-            <h3>Newspaper Office (City Desk) 📰</h3>
-            <p>Setting: Smelly, chaotic city desk. Reporter Jackie Miller is talking.</p>
-            <ul class="findings">
-                <li>Thorne was seen arguing violently with rival bookie **Sal 'The Quick' Ricci** 😡 two nights ago over 'stolen funds.'</li>
-                <li>The next morning, Ricci was suddenly wearing **expensive new cufflinks ✨**.</li>
-            </ul>
-        </div>
-
-        <div class="location">
-            <h3>Dingy Bar (The Velvet Shadow) 🥃</h3>
-            <p>Setting: The bartender Gus remembers things.</p>
-            <ul class="findings">
-                <li>Thorne was meeting **Clara**, the coat-check girl. He gave her the **silver necklace 💖**.</li>
-                <li>Clara was terrified of her abusive ex-boyfriend, **Mickey 🔪**.</li>
-                <li>Mickey once demanded the necklace back. He was always quiet and kept his hands hidden (suggesting a concealed, small weapon).</li>
-            </ul>
-        </div>
-
-        <a href="game.html" class="btn">Return to Stages</a>
+    <div class="title-bar">
+        <h1>Stage 2: Evidence Collection 🔎</h1>
     </div>
+
+    <div class="main-content">
+        <p>The city is a puzzle box. You need to hit these locations and dig up the clues that connect the victim, Thorne, to his killer. Every place you visit reveals a piece of the serpent's final moments.</p>
+
+        <!-- Grid of Location Boxes -->
+        <div class="location-grid" id="locationGrid">
+            <!-- These are populated by JavaScript -->
+        </div>
+
+        <!-- Next Stage Button (Hidden initially) -->
+        <div id="nextStageBox">
+            <p>You have collected all the evidence. The suspects are lined up. Time to make your call.</p>
+            <a href="stage_3_suspects.html" class="btn">Proceed to Suspects 🤔</a>
+        </div>
+
+    </div>
+
+    <!-- Modal (Evidence Window) -->
+    <div id="evidenceModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <h2 id="modalTitle"></h2>
+            <p id="modalSetting"></p>
+            <h3>Findings</h3>
+            <ul id="modalFindings">
+                <!-- Findings are injected here -->
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA STRUCTURE ---
+        const locationsData = [
+            {
+                id: 'penthouse',
+                title: "Crime Scene (Thorne's Penthouse) 🔎",
+                setting: "Super clean penthouse. You check the hidden spots.",
+                findings: [
+                    "Behind a mirror, you find a hidden drawer with a small, burned mark: a **stylized J 🔥**.",
+                    "In a Bible, you find a faded photograph of Thorne and a young woman. The note on the back says: ‘The money is safe. – E.’ 💰."
+                ]
+            },
+            {
+                id: 'precinct',
+                title: "Police Precinct (Homicide Desk) 🚨",
+                setting: "Murphy gives you 5 minutes with the file.",
+                findings: [
+                    "Thorne had a huge, secret debt to private lender **Ms. Evelyn Reed** 📄.",
+                    "He was recently paranoid, reporting that someone stole his **silver necklace ⛓️** and was using it to 'track' him."
+                ]
+            },
+            {
+                id: 'newspaper',
+                title: "Newspaper Office (City Desk) 📰",
+                setting: "Smelly, chaotic city desk. Reporter Jackie Miller is talking.",
+                findings: [
+                    "Thorne was seen arguing violently with rival bookie **Sal 'The Quick' Ricci** 😡 two nights ago over 'stolen funds.'",
+                    "The next morning, Ricci was suddenly wearing **expensive new cufflinks ✨**."
+                ]
+            },
+            {
+                id: 'bar',
+                title: "Dingy Bar (The Velvet Shadow) 🥃",
+                setting: "The bartender Gus remembers things.",
+                findings: [
+                    "Thorne was meeting **Clara**, the coat-check girl. He gave her the **silver necklace 💖**.",
+                    "Clara was terrified of her abusive ex-boyfriend, **Mickey 🔪**.",
+                    "Mickey once demanded the necklace back. He was always quiet and kept his hands hidden (suggesting a concealed, small weapon)."
+                ]
+            }
+        ];
+
+        // State management object to track visited locations
+        const visitedLocations = {};
+
+        // --- DOM ELEMENTS ---
+        const modal = document.getElementById('evidenceModal');
+        const nextStageBox = document.getElementById('nextStageBox');
+
+        // --- CORE FUNCTIONS ---
+
+        // 1. Renders the location boxes
+        function renderLocations() {
+            const grid = document.getElementById('locationGrid');
+            grid.innerHTML = ''; // Clear existing content
+
+            locationsData.forEach(location => {
+                const isVisited = visitedLocations[location.id];
+                const box = document.createElement('div');
+                box.className = `location-box ${isVisited ? 'visited' : ''}`;
+                box.setAttribute('data-id', location.id);
+                box.onclick = () => openModal(location);
+
+                box.innerHTML = `
+                    <h3>${location.title}</h3>
+                    <p>${location.setting.split('.')[0]}.</p>
+                `;
+                grid.appendChild(box);
+            });
+        }
+
+        // 2. Opens the modal and injects evidence data
+        function openModal(location) {
+            document.getElementById('modalTitle').innerHTML = location.title;
+            document.getElementById('modalSetting').textContent = location.setting;
+            
+            const findingsList = document.getElementById('modalFindings');
+            findingsList.innerHTML = '';
+            location.findings.forEach(finding => {
+                const li = document.createElement('li');
+                li.innerHTML = finding;
+                findingsList.appendChild(li);
+            });
+
+            modal.style.display = 'block';
+
+            // Mark as visited and check game progress
+            markVisited(location.id);
+        }
+
+        // 3. Closes the modal
+        function closeModal() {
+            modal.style.display = 'none';
+        }
+
+        // 4. Marks location as visited and updates UI/Game State
+        function markVisited(locationId) {
+            if (!visitedLocations[locationId]) {
+                visitedLocations[locationId] = true;
+                
+                // Re-render to update the visited border style
+                renderLocations(); 
+
+                checkGameProgress();
+            }
+        }
+        
+        // 5. Checks if all locations have been visited
+        function checkGameProgress() {
+            const totalLocations = locationsData.length;
+            const visitedCount = Object.keys(visitedLocations).length;
+            
+            if (visitedCount === totalLocations) {
+                // All evidence collected, show the next stage box
+                setTimeout(() => {
+                    nextStageBox.classList.add('visible');
+                    nextStageBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 500);
+            }
+        }
+
+        // Global click listener to close modal if user clicks outside
+        window.onclick = function(event) {
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+
+        // Initialize the stage
+        window.onload = renderLocations;
+    </script>
 </body>
 </html>
