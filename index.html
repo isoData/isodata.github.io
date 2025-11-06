@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Case:Zero - A Film Noir Detective Mystery</title>
+    <style>
+        /* Import Film Noir-esque fonts */
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=IBM+Plex+Mono:wght@300;400;700&display=swap');
+
+        body {
+            margin: 0;
+            font-family: 'IBM Plex Mono', monospace; /* Monospaced for a classic, typewritten feel */
+            color: #d0d0d0; /* Off-white for a worn paper look */
+            /* UPDATED: Using the GIF background */
+            background-image: url('https://i.imgur.com/G3cLxS8.gif');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            /* Optional: Add a subtle film grain effect */
+            filter: grayscale(10%) contrast(110%);
+        }
+
+        /* Stronger, grittier overlay for noir feel */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.85) 100%); /* Darker gradient */
+            z-index: 1;
+        }
+
+        .container {
+            position: relative;
+            z-index: 2;
+            padding: 25px;
+            max-width: 90%;
+            border: 2px solid rgba(255, 255, 255, 0.2); /* Subtle frame */
+            background-color: rgba(0, 0, 0, 0.4); /* Slightly visible dark background */
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.8); /* Deeper shadow */
+        }
+
+        h1 {
+            font-family: 'Cinzel Decorative', cursive; /* More ornate, title-like font */
+            font-weight: 700;
+            font-size: 3em;
+            margin-bottom: 10px;
+            color: #f0f0f0; /* Brighter title */
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.3), 0 0 20px rgba(0, 0, 0, 0.9); /* Glow + strong shadow */
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        p {
+            font-family: 'Courier New', monospace;;
+            font-size: 1.1em;
+            margin-bottom: 40px;
+            line-height: 1.6;
+            text-shadow: 1px 1px #000;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            font-weight: bolder;
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: #333; /* Darker, steel-like button */
+            color: #f0f0f0; /* Off-white text */
+            padding: 18px 35px;
+            border: 2px solid #666; /* Slightly lighter border */
+            border-radius: 0; /* Sharp corners for noir */
+            text-decoration: none;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 1.3em;
+            cursor: pointer;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+            box-shadow: 4px 4px 0px #000; /* Flat, graphic shadow */
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .btn:hover {
+            background-color: #444;
+            color: #FFAC47; /* A hint of gold on hover */
+            border-color: #FFAC47;
+            box-shadow: 6px 6px 0px #000;
+        }
+
+        .btn:active {
+            transform: translate(2px, 2px); /* Mimic a physical press */
+            box-shadow: 2px 2px 0px #000;
+        }
+
+        /* Responsive adjustments for smaller screens */
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2.2em;
+                letter-spacing: 1px;
+            }
+            p {
+                font-size: 0.9em;
+                margin-bottom: 30px;
+            }
+            .btn {
+                font-size: 1.1em;
+                padding: 15px 30px;
+            }
+            .container {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Case:Zero</h1>
+        <p>In the city's shadowed alleys, every whisper hides a lie, every silhouette a secret. Todays case awaits, detective.</p>
+        <a href="game.html" class="btn">Begin Investigation</a>
+    </div>
+</body>
+</html>
