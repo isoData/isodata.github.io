@@ -30,6 +30,7 @@
             width: 100%;
             height: 100%;
             z-index: -1;
+            /* FIXED: Reverting to the original GIF URL */
             background-image: url('https://i.imgur.com/aMU7nyM.gif');
             background-size: cover;
             background-position: center;
@@ -97,14 +98,23 @@
         }
 
         .suspect-card {
-            background-color: rgba(0, 0, 0, 0.8);
+            /* ADJUSTED: Reduced background opacity from 0.8 to 0.5 */
+            background-color: rgba(0, 0, 0, 0.5);
             padding: 25px;
             border: 3px solid #666;
             cursor: pointer;
-            transition: all 0.3s ease;
             box-shadow: 5px 5px 0px rgba(0, 0, 0, 0.8);
             border-radius: 4px;
             text-align: left;
+            
+            /* Fade-in animation properties */
+            opacity: 0; 
+            transition: opacity 2.5s ease-out, all 0.3s ease; 
+        }
+
+        /* NEW: Class to make the card visible */
+        .suspect-card.visible {
+            opacity: 1;
         }
 
         .suspect-card:hover {
@@ -152,7 +162,6 @@
             justify-content: center;
             align-items: center;
             animation: fadeIn 0.5s;
-            /* Removed padding-top: 150px; to allow true vertical centering */
         }
 
         .feedback-content {
@@ -240,7 +249,7 @@
             <div class="suspect-card" onclick="selectSuspect('Sal Ricci')">
                 <h3>Sal 'The Quick' Ricci 💸</h3>
                 <p><strong>Motive:</strong> Stolen money revenge.</p>
-                <p>Supporting Fact: Fought with Thorne, suddenly appeared wealthy.</p>
+                <p class="fact">Supporting Fact: Fought with Thorne, suddenly appeared wealthy.</p>
             </div>
 
             <div class="suspect-card" onclick="selectSuspect('Evelyn Reed')">
@@ -316,15 +325,26 @@
                 if (!content.classList.contains('correct')) {
                     
                     // 3. If in FAILURE state, close the modal on any click on the overlay.
-                    // We specifically check if the click target IS the modal itself (the overlay)
-                    // or if it contains the modal content (since we still want the button to work)
-                    // The 'Try Again' button also explicitly calls closeModal().
                     if (event.target === modal) {
                         closeModal();
                     }
                 }
             }
         }
+
+        // --- Sequential Fade-In Animation ---
+        function animateSuspects() {
+            const cards = document.querySelectorAll('.suspect-card');
+            cards.forEach((card, index) => {
+                // ADJUSTED: Sequentially fade in cards with a 1200ms delay between each one
+                setTimeout(() => {
+                    card.classList.add('visible');
+                }, index * 1200); 
+            });
+        }
+
+        // Run the animation once the page content is loaded
+        animateSuspects();
     </script>
 </body>
 </html>
