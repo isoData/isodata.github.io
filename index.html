@@ -10,8 +10,8 @@
 
         body {
             margin: 0;
-            font-family: 'IBM Plex Mono', monospace; /* Monospaced for a classic, typewritten feel */
-            color: #d0d0d0; /* Off-white for a worn paper look */
+            font-family: 'IBM Plex Mono', monospace;
+            color: #d0d0d0;
             /* UPDATED: Using the GIF background */
             background-image: url('https://i.imgur.com/G3cLxS8.gif');
             background-size: cover;
@@ -25,7 +25,6 @@
             text-align: center;
             position: relative;
             overflow: hidden;
-            /* Optional: Add a subtle film grain effect */
             filter: grayscale(10%) contrast(110%);
         }
 
@@ -37,33 +36,36 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.85) 100%); /* Darker gradient */
+            background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.85) 100%);
             z-index: 1;
         }
 
-        .container {
-            position: relative;
-            z-index: 2;
-            padding: 25px;
-            max-width: 90%;
-            border: 2px solid rgba(255, 255, 255, 0.2); /* Subtle frame */
-            background-color: rgba(0, 0, 0, 0.4); /* Slightly visible dark background */
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.8); /* Deeper shadow */
+        /* --- FADE IN ANIMATIONS --- */
+        @keyframes fadeInMove {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
         }
 
         h1 {
-            font-family: 'Cinzel Decorative', cursive; /* More ornate, title-like font */
+            position: relative; /* Ensure h1 is above the overlay */
+            z-index: 2;
+            font-family: 'Cinzel Decorative', cursive;
             font-weight: 700;
             font-size: 3em;
             margin-bottom: 10px;
-            color: #f0f0f0; /* Brighter title */
-            text-shadow: 0 0 8px rgba(255, 255, 255, 0.3), 0 0 20px rgba(0, 0, 0, 0.9); /* Glow + strong shadow */
+            color: #f0f0f0;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.3), 0 0 20px rgba(0, 0, 0, 0.9);
             letter-spacing: 2px;
             text-transform: uppercase;
+            /* Initial state and animation for title */
+            opacity: 0;
+            animation: fadeInMove 2s ease-out 0.5s forwards; /* Start after 0.5s, lasts 2s */
         }
 
         p {
-            font-family: 'Courier New', monospace;;
+            position: relative; /* Ensure p is above the overlay */
+            z-index: 2;
+            font-family: 'Courier New', monospace;
             font-size: 1.1em;
             margin-bottom: 40px;
             line-height: 1.6;
@@ -72,34 +74,55 @@
             margin-left: auto;
             margin-right: auto;
             font-weight: bolder;
+            /* Animation for description text */
+            opacity: 0;
+            animation: fadeInMove 1.5s ease-out 2.5s forwards; /* Starts after title finishes */
         }
 
+        /* --- Button Styling --- */
         .btn {
+            position: relative;
+            z-index: 2;
             display: inline-block;
-            background-color: #333; /* Darker, steel-like button */
-            color: #f0f0f0; /* Off-white text */
+            background-color: #333;
+            color: #f0f0f0;
             padding: 18px 35px;
-            border: 2px solid #666; /* Slightly lighter border */
-            border-radius: 0; /* Sharp corners for noir */
+            
+            /* UPDATED: Thicker border and gold color for stronger visual emphasis */
+            border: 3px solid #FFAC47; 
+            
+            border-radius: 0;
             text-decoration: none;
             font-family: 'IBM Plex Mono', monospace;
             font-size: 1.3em;
             cursor: pointer;
             transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-            box-shadow: 4px 4px 0px #000; /* Flat, graphic shadow */
+            box-shadow: 4px 4px 0px #000;
             letter-spacing: 1px;
             text-transform: uppercase;
+            
+            /* Initially hidden via JS/CSS class, but reserve space */
+            opacity: 0; 
+            pointer-events: none; /* Disable clicks until visible */
+            transform: scale(0.9);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .btn.visible {
+            opacity: 1;
+            pointer-events: auto;
+            transform: scale(1);
         }
 
         .btn:hover {
             background-color: #444;
-            color: #FFAC47; /* A hint of gold on hover */
+            color: #FFAC47;
             border-color: #FFAC47;
             box-shadow: 6px 6px 0px #000;
         }
 
         .btn:active {
-            transform: translate(2px, 2px); /* Mimic a physical press */
+            transform: translate(2px, 2px);
             box-shadow: 2px 2px 0px #000;
         }
 
@@ -117,17 +140,24 @@
                 font-size: 1.1em;
                 padding: 15px 30px;
             }
-            .container {
-                padding: 15px;
-            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Case:Zero</h1>
-        <p>In the city's shadowed alleys, every whisper hides a lie, every silhouette a secret. Todays case awaits, detective.</p>
-        <a href="game.html" class="btn">Begin Investigation</a>
-    </div>
+    <h1>Case:Zero</h1>
+    <p>In the city's shadowed alleys, every whisper hides a lie, every silhouette a secret. Todays case awaits, detective.</p>
+    <a href="game.html" id="beginBtn" class="btn">Begin Investigation</a>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const beginBtn = document.getElementById('beginBtn');
+            // Delay the appearance of the button significantly (e.g., 4 seconds total)
+            const delayTime = 4000; 
+
+            setTimeout(() => {
+                beginBtn.classList.add('visible');
+            }, delayTime);
+        });
+    </script>
 </body>
 </html>
