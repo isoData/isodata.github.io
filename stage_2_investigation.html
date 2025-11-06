@@ -18,7 +18,8 @@
             align-items: center;
             text-align: center;
             position: relative;
-            padding-bottom: 50px;
+            /* Base padding for the entire body content */
+            padding-bottom: 50px; 
             filter: grayscale(10%) contrast(110%);
         }
 
@@ -62,7 +63,6 @@
             background-color: rgba(0, 0, 0, 0.7);
             border-bottom: 2px solid #FFAC47;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.8);
-            /* NEW: Initial hidden state and fade-in animation */
             opacity: 0;
             animation: fadeInMove 2s ease-out 0.5s forwards;
         }
@@ -87,10 +87,11 @@
             margin: 0 auto;
             padding: 30px 20px;
             box-sizing: border-box;
+            /* FIX: Increased bottom padding greatly to ensure the last evidence box is visible above the dynamically appearing next stage box */
+            padding-bottom: 280px; 
         }
         
         .main-content > p {
-            /* NEW: Initial hidden state and fade-in animation for instruction text */
             opacity: 0;
             animation: fadeInMove 1.5s ease-out 2.5s forwards;
         }
@@ -102,7 +103,6 @@
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 25px;
             margin-top: 40px;
-            /* NEW: Animation delay for the whole grid */
             opacity: 0;
             animation: fadeInMove 1s ease-out 4s forwards;
         }
@@ -110,7 +110,6 @@
         .location-box {
             background-color: rgba(0, 0, 0, 0.8);
             padding: 25px;
-            /* UPDATED: Thicker gold border on default */
             border: 3px solid #FFAC47; 
             cursor: pointer;
             transition: all 0.3s ease;
@@ -119,7 +118,7 @@
         }
 
         .location-box:hover {
-            border-color: #f0f0f0; /* Change border color slightly on hover */
+            border-color: #f0f0f0; 
             background-color: rgba(26, 35, 58, 0.9);
             transform: translateY(-2px);
             box-shadow: 7px 7px 0px rgba(0, 0, 0, 0.8);
@@ -127,7 +126,7 @@
 
         /* Visited State */
         .location-box.visited {
-            border-color: #4CAF50; /* Green outline for visited */
+            border-color: #4CAF50; 
             background-color: rgba(76, 175, 80, 0.1);
         }
 
@@ -169,7 +168,6 @@
             box-shadow: 0 0 40px #FFAC4733;
             text-align: left;
             animation: slideDown 0.5s;
-            /* FIX: Ensure padding and border are included in the 80% width calculation */
             box-sizing: border-box; 
         }
 
@@ -201,25 +199,27 @@
             padding-bottom: 5px;
         }
 
-        /* --- Next Stage Button Container (NEW: Reserves space for smooth entry) --- */
+        /* --- Next Stage Button Container (FLOW FIX) --- */
         .next-stage-container {
-            /* INCREASED HEIGHT for safety and stability */
-            height: 180px; 
+            /* REMOVED ABSOLUTE POSITIONING to allow container to flow naturally after the grid */
+            height: auto; 
             display: flex;
             justify-content: center;
             align-items: center;
             width: 100%;
-            margin-top: 50px;
+            /* Push container down below the grid */
+            margin-top: 50px; 
+            /* Added padding-bottom to the container itself for extra clearance */
+            padding-bottom: 30px; 
         }
-
-        /* --- Next Stage Button (Previously Hidden) --- */
+        
+        /* --- Next Stage Button (Appears inside the container) --- */
         #nextStageBox {
             background-color: rgba(255, 172, 71, 0.2);
             padding: 30px;
             border: 3px solid #FFAC47;
             text-align: center;
             
-            /* Change initial state to invisible scale/opacity for smooth transition */
             opacity: 0;
             transform: scale(0.8);
             transition: all 0.5s ease-out;
@@ -227,7 +227,7 @@
             cursor: pointer;
             width: 80%;
             max-width: 600px;
-            box-sizing: border-box; /* Ensure internal dimensions are stable */
+            box-sizing: border-box; 
         }
 
         #nextStageBox.visible {
@@ -238,7 +238,6 @@
         
         .btn { /* General Button Styling */
             display: inline-block; background-color: #333; color: #f0f0f0; padding: 18px 35px;
-            /* UPDATED: Thicker gold border */
             border: 3px solid #FFAC47; 
             border-radius: 0; text-decoration: none;
             font-family: 'IBM Plex Mono', monospace; margin-top: 20px;
@@ -260,7 +259,6 @@
         /* Responsive adjustments */
         @media (max-width: 600px) {
             h1 { font-size: 1.8em; }
-            /* Adjusted modal width slightly and ensure box-sizing is respected */
             .modal-content { width: 90%; margin: 10% auto; padding: 25px; box-sizing: border-box; }
             .location-box h3 { font-size: 1.2em; }
             .location-grid { grid-template-columns: 1fr; }
@@ -297,7 +295,8 @@
 
     <!-- Modal (Evidence Window) -->
     <div id="evidenceModal" class="modal">
-        <div class="modal-content">
+        <!-- Added id="modalContent" here -->
+        <div id="modalContent" class="modal-content">
             <span class="close-btn" onclick="closeModal()">&times;</span>
             <h2 id="modalTitle"></h2>
             <p id="modalSetting"></p>
@@ -352,9 +351,11 @@
 
         // State management object to track visited locations
         const visitedLocations = {};
+        let currentOpenModalId = null; // State to track the currently open modal
 
         // --- DOM ELEMENTS ---
         const modal = document.getElementById('evidenceModal');
+        const modalContent = document.getElementById('modalContent'); // Get content reference
         const nextStageBox = document.getElementById('nextStageBox');
 
         // --- CORE FUNCTIONS ---
@@ -369,7 +370,24 @@
                 const box = document.createElement('div');
                 box.className = `location-box ${isVisited ? 'visited' : ''}`;
                 box.setAttribute('data-id', location.id);
-                box.onclick = () => openModal(location);
+                
+                // Location box click logic remains the same (close current/open new)
+                box.onclick = () => {
+                    const clickedId = location.id;
+                    
+                    if (modal.style.display === 'block') {
+                        if (currentOpenModalId === clickedId) {
+                            closeModal();
+                        } else {
+                            closeModal(); 
+                            setTimeout(() => {
+                                openModal(location);
+                            }, 50); 
+                        }
+                    } else {
+                        openModal(location);
+                    }
+                };
 
                 box.innerHTML = `
                     <h3>${location.title}</h3>
@@ -393,6 +411,7 @@
             });
 
             modal.style.display = 'block';
+            currentOpenModalId = location.id; // Set the tracking state
 
             // Mark as visited and check game progress
             markVisited(location.id);
@@ -401,6 +420,7 @@
         // 3. Closes the modal
         function closeModal() {
             modal.style.display = 'none';
+            currentOpenModalId = null; // Clear the tracking state
         }
 
         // 4. Marks location as visited and updates UI/Game State
@@ -408,9 +428,7 @@
             if (!visitedLocations[locationId]) {
                 visitedLocations[locationId] = true;
                 
-                // Re-render to update the visited border style
                 renderLocations(); 
-
                 checkGameProgress();
             }
         }
@@ -421,22 +439,21 @@
             const visitedCount = Object.keys(visitedLocations).length;
             
             if (visitedCount === totalLocations) {
-                // All evidence collected, show the next stage box
                 setTimeout(() => {
-                    // Use the existing 'visible' class to trigger smooth scale/opacity transition
                     nextStageBox.classList.add('visible');
-                    
                 }, 500);
             }
         }
 
-        // Global click listener to close modal if user clicks outside
+        // Listener to close modal when clicking the dark background overlay
         modal.addEventListener('click', function(event) {
-            // Check if the click occurred directly on the modal element (the background overlay)
             if (event.target === modal) {
                 closeModal();
             }
         });
+        
+        // Listener to close modal when clicking the content box itself (anywhere inside)
+        modalContent.addEventListener('click', closeModal);
 
         // Initialize the stage
         window.onload = renderLocations;
