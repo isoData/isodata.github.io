@@ -5,75 +5,301 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stage 3: The Suspects</title>
     <style>
-        /* Shared Styles for Stage Pages */
+        /* Import Film Noir-esque fonts */
         @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=IBM+Plex+Mono:wght@300;400;700&display=swap');
 
+        html { height: 100%; }
+
         body {
-            margin: 0; font-family: 'IBM Plex Mono', monospace; color: #d0d0d0;
-            background-color: #1A233A; /* Plain Dark Blue Background */
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            min-height: 100vh; padding: 20px;
+            margin: 0;
+            font-family: 'IBM Plex Mono', monospace;
+            color: #d0d0d0;
+            min-height: 100%;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            padding-bottom: 50px;
+            filter: grayscale(10%) contrast(110%);
         }
-        .container {
-            padding: 40px; max-width: 700px; border: 2px solid #FFAC47;
-            background-color: rgba(0, 0, 0, 0.85); box-shadow: 0 0 30px rgba(0, 0, 0, 1);
+
+        /* --- Full-Screen Background Container (from game.html) --- */
+        .background-fixed {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background-image: url('https://i.imgur.com/iqioKnE.gif');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .background-fixed::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.8) 100%);
+            z-index: 1;
+        }
+        
+        /* --- Title Styling --- */
+        .title-bar {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            padding: 20px 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-bottom: 2px solid #FFAC47;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.8);
+        }
+
+        h1 {
+            font-family: 'Cinzel Decorative', cursive;
+            font-weight: 700;
+            font-size: 2.5em;
+            margin: 0;
+            color: #f0f0f0;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.3), 0 0 20px rgba(0, 0, 0, 0.9);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* --- Main Content Area --- */
+        .main-content {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 30px 20px;
+            box-sizing: border-box;
+        }
+        
+        .instruction {
+            font-size: 1.2em;
+            margin-bottom: 40px;
+            padding: 15px;
+            background-color: rgba(255, 172, 71, 0.1);
+            border: 1px dashed #FFAC47;
+        }
+
+        /* --- Suspect Grid --- */
+        .suspect-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 40px;
+        }
+
+        .suspect-card {
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 25px;
+            border: 3px solid #666;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 5px 5px 0px rgba(0, 0, 0, 0.8);
+            border-radius: 4px;
             text-align: left;
         }
-        h2 {
-            font-family: 'Cinzel Decorative', cursive; color: #FFAC47;
-            text-transform: uppercase; border-bottom: 1px solid #666;
-            padding-bottom: 10px; margin-bottom: 30px; text-align: center;
+
+        .suspect-card:hover {
+            border-color: #FFAC47;
+            background-color: rgba(255, 172, 71, 0.2); 
+            transform: translateY(-2px);
+            box-shadow: 7px 7px 0px rgba(0, 0, 0, 0.8);
         }
-        .instruction { text-align: center; margin-bottom: 40px; font-size: 1.2em; color: #f0f0f0; }
-        .suspect { 
-            margin-bottom: 25px; 
-            padding: 15px; 
-            border: 1px solid #333; 
-            background-color: rgba(255, 255, 255, 0.05);
+
+        .suspect-card h3 {
+            font-family: 'Cinzel Decorative', cursive;
+            color: #f0f0f0;
+            margin: 0 0 10px 0;
+            font-size: 1.6em;
+            border-bottom: 1px dashed #666;
+            padding-bottom: 5px;
         }
-        .suspect-name { font-size: 1.4em; color: #FFAC47; margin-bottom: 5px; }
-        .motive { margin: 5px 0; }
-        .supporting-fact { font-style: italic; color: #aaa; margin-top: 5px; }
-        strong { color: #FFAC47; }
-        .btn { /* Go Back Button Styling */
-            display: inline-block; background-color: #333; color: #f0f0f0; padding: 10px 20px;
+        
+        .suspect-card strong {
+            color: #FFAC47;
+        }
+
+        .suspect-card p {
+            font-size: 1em;
+            margin-bottom: 5px;
+        }
+
+        .suspect-card .fact {
+            font-style: italic;
+            color: #aaa;
+            margin-top: 10px;
+        }
+        
+        /* --- Feedback Modal --- */
+        .feedback-modal {
+            display: none; 
+            position: fixed; 
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            padding-top: 150px;
+            animation: fadeIn 0.5s;
+        }
+
+        .feedback-content {
+            background-color: #3A1A1A; /* Reddish Dark Background for urgency/failure */
+            margin: auto;
+            padding: 40px;
+            border: 3px solid #FF3333; /* Red Border */
+            width: 80%;
+            max-width: 500px;
+            position: relative;
+            box-shadow: 0 0 40px rgba(255, 51, 51, 0.3);
+            text-align: center;
+        }
+
+        .feedback-content.correct {
+            background-color: #1A3A1A; /* Greenish Dark Background for success */
+            border: 3px solid #4CAF50; /* Green Border */
+            box-shadow: 0 0 40px rgba(76, 175, 80, 0.3);
+        }
+        
+        .feedback-content h2 {
+            font-family: 'Cinzel Decorative', cursive;
+            color: #FF3333;
+            margin-bottom: 20px;
+        }
+        
+        .feedback-content.correct h2 {
+            color: #4CAF50;
+        }
+        
+        .feedback-content p {
+            font-size: 1.1em;
+            margin-bottom: 30px;
+        }
+        
+        /* --- Button Styling --- */
+        .btn { /* General Button Styling from game.html */
+            display: inline-block; background-color: #333; color: #f0f0f0; padding: 18px 35px;
             border: 2px solid #666; border-radius: 0; text-decoration: none;
-            font-family: 'IBM Plex Mono', monospace; margin-top: 30px;
-            box-shadow: 3px 3px 0px #000;
+            font-family: 'IBM Plex Mono', monospace; margin-top: 20px;
+            box-shadow: 4px 4px 0px #000; letter-spacing: 1px; text-transform: uppercase;
         }
         .btn:hover { background-color: #444; color: #FFAC47; border-color: #FFAC47; }
+        .btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0px #000; }
+
+        /* Animations */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            h1 { font-size: 1.8em; }
+            .suspect-grid { grid-template-columns: 1fr; }
+            .feedback-content { width: 90%; padding: 25px; }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Stage 3: The Suspects 🤔</h2>
-        <p class="instruction">Time to choose the killer based on Motive, Means, and Opportunity.</p>
+    <div class="background-fixed"></div>
 
-        <div class="suspect">
-            <div class="suspect-name">Vito 'The Hammer' Moretti 🔨</div>
-            <div class="motive"><strong>Motive:</strong> Silence a witness.</div>
-            <div class="supporting-fact">Supporting Fact: Pro hit, silenced gun fits the MO.</div>
-        </div>
-
-        <div class="suspect">
-            <div class="suspect-name">Sal 'The Quick' Ricci 💸</div>
-            <div class="motive"><strong>Motive:</strong> Stolen money revenge.</div>
-            <div class="supporting-fact">Supporting Fact: Fought with Thorne, suddenly appeared wealthy.</div>
-        </div>
-        
-        <div class="suspect">
-            <div class="suspect-name">Ms. Evelyn Reed 🏦</div>
-            <div class="motive"><strong>Motive:</strong> Huge debt collection.</div>
-            <div class="supporting-fact">Supporting Fact: Private lender with potential connections to enforce payment.</div>
-        </div>
-
-        <div class="suspect">
-            <div class="suspect-name">Mickey (Clara's Ex) 🤫</div>
-            <div class="motive"><strong>Motive:</strong> Jealousy/Control.</div>
-            <div class="supporting-fact">Supporting Fact: Quiet killer, obsessed with the necklace/Clara.</div>
-        </div>
-
-        <a href="game.html" class="btn">Return to Stages</a>
+    <div class="title-bar">
+        <h1>Stage 3: The Suspects 🤔</h1>
     </div>
+
+    <div class="main-content">
+        <p class="instruction">
+            Detective, you have the evidence. Motive, means, and opportunity are all present. 
+            Choose the killer who truly fits the case of the **broken silver earring** and the **stylized 'J' mark**.
+            Once you choose, there is no turning back.
+        </p>
+
+        <div class="suspect-grid">
+            
+            <div class="suspect-card" onclick="selectSuspect('Vito Moretti')">
+                <h3>Vito 'The Hammer' Moretti 🔨</h3>
+                <p><strong>Motive:</strong> Silence a witness.</p>
+                <p class="fact">Supporting Fact: Pro hit, silenced gun fits the MO.</p>
+            </div>
+
+            <div class="suspect-card" onclick="selectSuspect('Sal Ricci')">
+                <h3>Sal 'The Quick' Ricci 💸</h3>
+                <p><strong>Motive:</strong> Stolen money revenge.</p>
+                <p class="fact">Supporting Fact: Fought with Thorne, suddenly appeared wealthy.</p>
+            </div>
+
+            <div class="suspect-card" onclick="selectSuspect('Evelyn Reed')">
+                <h3>Ms. Evelyn Reed 🏦</h3>
+                <p><strong>Motive:</strong> Huge debt collection.</p>
+                <p class="fact">Supporting Fact: Private lender with potential connections to enforce payment.</p>
+            </div>
+
+            <div class="suspect-card" onclick="selectSuspect('Mickey')">
+                <h3>Mickey (Clara's Ex) 🤫</h3>
+                <p><strong>Motive:</strong> Jealousy/Control.</p>
+                <p class="fact">Supporting Fact: Quiet killer, obsessed with the necklace/Clara.</p>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="feedbackModal" class="feedback-modal">
+        <div id="feedbackContent" class="feedback-content">
+            <h2 id="feedbackTitle"></h2>
+            <p id="feedbackMessage"></p>
+            <a href="stage_4_reveal.html" id="nextStageBtn" class="btn" style="display: none;">View Conclusion</a>
+            <button id="tryAgainBtn" class="btn" onclick="closeModal()">Try Again</button>
+        </div>
+    </div>
+
+    <script>
+        const CORRECT_KILLER = 'Mickey'; 
+
+        // --- Suspect Selection Handler ---
+        function selectSuspect(suspectName) {
+            const modal = document.getElementById('feedbackModal');
+            const content = document.getElementById('feedbackContent');
+            const title = document.getElementById('feedbackTitle');
+            const message = document.getElementById('feedbackMessage');
+            const nextBtn = document.getElementById('nextStageBtn');
+            const retryBtn = document.getElementById('tryAgainBtn');
+
+            if (suspectName === CORRECT_KILLER) {
+                // Correct Choice
+                content.classList.add('correct');
+                title.textContent = "CASE CRACKED!";
+                message.textContent = `You correctly identified ${suspectName} as the killer. Your meticulous work has paid off, Detective. Time for the final reveal.`;
+                nextBtn.style.display = 'inline-block';
+                retryBtn.style.display = 'none';
+            } else {
+                // Incorrect Choice
+                content.classList.remove('correct');
+                title.textContent = "WRONG CALL, DETECTIVE.";
+                message.textContent = `You targeted ${suspectName}. The evidence doesn't quite line up. Thorne's last clue points elsewhere. You missed a vital piece of the puzzle. Review the evidence and try again.`;
+                nextBtn.style.display = 'none';
+                retryBtn.style.display = 'inline-block';
+            }
+
+            modal.style.display = 'block';
+        }
+
+        // --- Modal Control ---
+        function closeModal() {
+            document.getElementById('feedbackModal').style.display = 'none';
+        }
+
+        // Close modal if user clicks outside
+        window.onclick = function(event) {
+            if (event.target === document.getElementById('feedbackModal')) {
+                closeModal();
+            }
+        }
+    </script>
 </body>
 </html>
