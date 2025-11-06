@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Case:Zero - The Briefing</title>
+    <title>Case:Zero - The Case of the Silver Serpent</title>
     <style>
         /* Import Film Noir-esque fonts */
         @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=IBM+Plex+Mono:wght@300;400;700&display=swap');
@@ -12,7 +12,7 @@
             margin: 0;
             font-family: 'IBM Plex Mono', monospace;
             color: #d0d0d0;
-            /* NEW BACKGROUND: Smokey Alley GIF */
+            /* Main Game Background: Smokey Alley GIF */
             background-image: url('https://i.imgur.com/iqioKnE.gif');
             background-size: cover;
             background-position: center;
@@ -28,7 +28,6 @@
             filter: grayscale(10%) contrast(110%);
         }
 
-        /* Stronger, grittier overlay for noir feel */
         body::before {
             content: '';
             position: absolute;
@@ -36,7 +35,6 @@
             left: 0;
             right: 0;
             bottom: 0;
-            /* Slightly lighter dark gradient for visibility over the background */
             background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.8) 100%);
             z-index: 1;
         }
@@ -47,45 +45,35 @@
             padding: 30px 40px;
             max-width: 800px;
             border: 2px solid rgba(255, 255, 255, 0.2);
-            background-color: rgba(0, 0, 0, 0.6); /* More visible dark background */
-            box-shadow: 0 0 25px rgba(0, 0, 0, 1.0); /* Deeper shadow */
-            text-align: left; /* Text alignment for easier reading of the brief */
+            background-color: rgba(0, 0, 0, 0.6);
+            box-shadow: 0 0 25px rgba(0, 0, 0, 1.0);
         }
 
         h2 {
             font-family: 'Cinzel Decorative', cursive;
             font-weight: 700;
-            font-size: 2em;
-            margin-bottom: 20px;
-            color: #FFAC47; /* Gold accent for the title */
-            text-shadow: 0 0 5px rgba(255, 172, 71, 0.4);
-            letter-spacing: 1px;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            color: #FFAC47;
+            text-shadow: 0 0 8px rgba(255, 172, 71, 0.5);
+            letter-spacing: 2px;
             text-transform: uppercase;
             border-bottom: 1px dashed #666;
-            padding-bottom: 10px;
-            text-align: center;
-        }
-
-        p {
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 1.1em;
-            margin-bottom: 20px;
-            line-height: 1.7;
-            text-shadow: 1px 1px #000;
-            font-weight: 400;
-        }
-
-        .dialogue {
-            border-left: 3px solid #FFAC47;
-            padding-left: 15px;
-            margin: 30px 0;
-            font-style: italic;
-            color: #f0f0f0;
+            padding-bottom: 15px;
         }
         
+        h3 {
+             font-family: 'IBM Plex Mono', monospace;
+             font-size: 1.4em;
+             color: #d0d0d0;
+             margin-top: 30px;
+        }
+
         .choices {
-            text-align: center;
-            margin-top: 40px;
+            margin-top: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
 
         .btn {
@@ -93,7 +81,6 @@
             background-color: #333;
             color: #f0f0f0;
             padding: 15px 30px;
-            margin: 10px;
             border: 2px solid #666;
             border-radius: 0;
             text-decoration: none;
@@ -104,6 +91,8 @@
             box-shadow: 3px 3px 0px #000;
             letter-spacing: 1px;
             text-transform: uppercase;
+            width: 80%; /* Adjusted for better stacking appearance */
+            margin: 0 auto;
         }
 
         .btn:hover {
@@ -112,44 +101,19 @@
             border-color: #FFAC47;
             box-shadow: 4px 4px 0px #000;
         }
-
-        .btn:active {
-            transform: translate(1px, 1px);
-            box-shadow: 1px 1px 0px #000;
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-            .container {
-                padding: 20px;
-                max-width: 95%;
-            }
-            h2 {
-                font-size: 1.8em;
-            }
-            p {
-                font-size: 1em;
-            }
-            .btn {
-                font-size: 1em;
-                padding: 12px 25px;
-                display: block; /* Stack buttons on small screens */
-            }
-        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>The Sinclair Job</h2>
-        <p>The rain is a steady, unforgiving drumbeat on the window of your office. A small, crumpled note on your desk details the case: **Evelyn Sinclair**, missing for 48 hours. No witnesses, no ransom, just a locked apartment and a chill that doesn't come from the December air.</p>
+        <h2>The Case of the Silver Serpent 🐍</h2>
+        <p>A new, dangerous case has landed on your desk. Follow the leads, collect the evidence, and name the killer before the trail runs cold.</p>
         
-        <p class="dialogue">"She was a dame with expensive taste and a reputation to match," the voice on the wire had said, rasping like cheap whiskey. "Check the usual haunts first, Detective. She liked the bright lights, even if they were just reflecting off the puddles."</p>
-
-        <p>You stub out your cigarette. The city is waiting for its answer, and the night is young and dangerous. Two starting points stand out from her phone records—a high-end jazz club and a secluded, downtown art gallery.</p>
-
+        <h3>Stage Selection</h3>
         <div class="choices">
-            <a href="scene_jazzclub.html" class="btn">Head to the Jazz Club</a>
-            <a href="scene_gallery.html" class="btn">Investigate the Gallery</a>
+            <a href="stage_1_office.html" class="btn">Stage 1: Case Introduction (Your Office) 💼</a>
+            <a href="stage_2_investigation.html" class="btn">Stage 2: Evidence Collection 🔎</a>
+            <a href="stage_3_suspects.html" class="btn">Stage 3: The Suspects 🤔</a>
+            <a href="stage_4_reveal.html" class="btn">Stage 4: The Conclusion (The Reveal) 🚨</a>
         </div>
     </div>
 </body>
