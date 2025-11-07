@@ -266,7 +266,6 @@
     </style>
 </head>
 <body>
-    <!-- Fixed Background Element -->
     <div class="background-fixed"></div>
 
     <div class="title-bar">
@@ -274,17 +273,12 @@
     </div>
 
     <div class="main-content">
-        <!-- This paragraph gets a delayed fade-in -->
         <p>The city is a puzzle box. You need to hit these locations and dig up the clues that connect the victim, Thorne, to his killer. Every place you visit reveals a piece of the serpent's final moments.</p>
 
-        <!-- Grid of Location Boxes (Delayed appearance) -->
         <div class="location-grid" id="locationGrid">
-            <!-- These are populated by JavaScript -->
-        </div>
+            </div>
 
-        <!-- NEW: Container to prevent layout shift -->
         <div class="next-stage-container">
-            <!-- Next Stage Button -->
             <div id="nextStageBox">
                 <p>You have collected all the evidence. The suspects are lined up. Time to make your call.</p>
                 <a href="stage_3_suspects.html" class="btn">Proceed to Suspects 🤔</a>
@@ -293,27 +287,24 @@
 
     </div>
 
-    <!-- Modal (Evidence Window) -->
     <div id="evidenceModal" class="modal">
-        <!-- Added id="modalContent" here -->
         <div id="modalContent" class="modal-content">
             <span class="close-btn" onclick="closeModal()">&times;</span>
             <h2 id="modalTitle"></h2>
             <p id="modalSetting"></p>
             <h3>Findings</h3>
             <ul id="modalFindings">
-                <!-- Findings are injected here -->
-            </ul>
+                </ul>
         </div>
     </div>
 
     <script>
-        // --- DATA STRUCTURE ---
+        // --- DATA STRUCTURE (UPDATED) ---
         const locationsData = [
             {
                 id: 'penthouse',
                 title: "Crime Scene (Thorne's Penthouse) 🔎",
-                setting: "Super clean penthouse. You check the hidden spots.",
+                setting: "Thorne kept a clean house, but the best lies are tucked just out of sight. You run your hand over the dead man's opulent veneer, looking for the cracks.",
                 findings: [
                     "Behind a mirror, you find a hidden drawer with a small, burned mark: a **stylized J 🔥**.",
                     "In a Bible, you find a faded photograph of Thorne and a young woman. The note on the back says: ‘The money is safe. – E.’ 💰."
@@ -322,29 +313,29 @@
             {
                 id: 'precinct',
                 title: "Police Precinct (Homicide Desk) 🚨",
-                setting: "Murphy gives you 5 minutes with the file.",
+                setting: "Murphy gives you 5 minutes with the file. The air smells of stale coffee and desperation.",
                 findings: [
-                    "Thorne had a huge, secret debt to private lender **Ms. Evelyn Reed** 📄.",
-                    "He was recently paranoid, reporting that someone stole his **silver necklace ⛓️** and was using it to 'track' him."
+                    "Thorne had a huge, secret debt to private lender Ms. Evelyn Reed 📄.",
+                    "He was recently paranoid, reporting that someone stole **the silver necklace he had given Clara** (which had a distinctive clasp) and was using it to 'track' him. ⛓️"
                 ]
             },
             {
                 id: 'newspaper',
                 title: "Newspaper Office (City Desk) 📰",
-                setting: "Smelly, chaotic city desk. Reporter Jackie Miller is talking.",
+                setting: "Smelly, chaotic city desk. Reporter Jackie Miller talks fast, eyes always on the next headline.",
                 findings: [
-                    "Thorne was seen arguing violently with rival bookie **Sal 'The Quick' Ricci** 😡 two nights ago over 'stolen funds.'",
-                    "The next morning, Ricci was suddenly wearing **expensive new cufflinks ✨**."
+                    "Thorne was seen arguing violently with rival bookie Sal 'The Quick' Ricci 😡 two nights ago over 'stolen funds.'",
+                    "The next morning, Ricci was suddenly wearing expensive new cufflinks ✨, paid for in cash."
                 ]
             },
             {
                 id: 'bar',
                 title: "Dingy Bar (The Velvet Shadow) 🥃",
-                setting: "The bartender Gus remembers things.",
+                setting: "The bartender Gus polishes the same glass, remembering every cheap secret traded across his counter.",
                 findings: [
-                    "Thorne was meeting **Clara**, the coat-check girl. He gave her the **silver necklace 💖**.",
-                    "Clara was terrified of her abusive ex-boyfriend, **Mickey 🔪**.",
-                    "Mickey once demanded the necklace back. He was always quiet and kept his hands hidden (suggesting a concealed, small weapon)."
+                    "Thorne was dating Clara, the coat-check girl. He gave her a **silver necklace and matching earrings** 🎁.",
+                    "Clara was terrified of her abusive ex-boyfriend, Mickey 🔪.",
+                    "Mickey once **violently demanded the jewelry** (the gift from Thorne) to be discarded. He was always quiet and kept his hands hidden, which Gus found unsettling."
                 ]
             }
         ];
@@ -389,9 +380,15 @@
                     }
                 };
 
+                // Use the first sentence of the setting as the summary text
+                let summary = location.setting.split('. ')[0];
+                if (!summary.endsWith('.')) {
+                    summary += '.';
+                }
+
                 box.innerHTML = `
                     <h3>${location.title}</h3>
-                    <p>${location.setting.split('.')[0]}.</p>
+                    <p>${summary}</p>
                 `;
                 grid.appendChild(box);
             });
