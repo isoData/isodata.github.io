@@ -170,10 +170,9 @@
             animation: slideDown 0.5s;
             box-sizing: border-box;
             
-            /* --- FIX: Added scrolling support for long content --- */
-            max-height: 85vh; /* Set a maximum height relative to viewport */
-            overflow-y: auto; /* Enable vertical scrolling if content exceeds max-height */
-            /* -------------------------------------------------- */
+            /* Scrolling support for long content */
+            max-height: 85vh; 
+            overflow-y: auto; 
         }
 
         .close-btn {
@@ -451,19 +450,23 @@
             }
         }
 
-        // Listener to close modal when clicking the dark background overlay
+        // --- EVENT LISTENERS ---
+
+        // This listener closes the modal when clicking the dark background overlay.
+        // It ensures that event.target is the 'modal' element itself, not the content box.
         modal.addEventListener('click', function(event) {
             if (event.target === modal) {
                 closeModal();
             }
         });
         
-        // Listener to prevent closing when clicking the content box itself. 
-        // We only want the close button or background overlay to close it.
-        // We must remove this listener from the original code: modalContent.addEventListener('click', closeModal);
-        
-        // Listener to close modal when clicking the close button
-        document.querySelector('.close-btn').onclick = closeModal;
+        // NEW: Listener to close the modal when clicking the content box itself.
+        // NOTE: While this fulfills the request, this action will disable natural scrolling 
+        // on the content box on most touch devices (mobile) as a tap/scroll start 
+        // will be interpreted as a click and close the modal.
+        modalContent.addEventListener('click', closeModal);
+
+        // The close button uses the onclick="closeModal()" attribute directly in the HTML.
         
         // Initialize the stage
         window.onload = renderLocations;
