@@ -173,7 +173,7 @@
         }
 
         /**
-         * Simulates the API call upon clicking 'Continue'.
+         * Handles the navigation upon clicking 'Continue'.
          */
         function handleContinue() {
             if (selectedTopics.length < 3) {
@@ -181,7 +181,7 @@
                 return;
             }
 
-            showMessage('Preparing your personalized learning path...', 'info');
+            showMessage('Success! Your personalized feed is ready. Redirecting...', 'success');
 
             // --- LLM API INTERACTION SIMULATION START ---
             // In a real application, we would prepare a payload to ask the LLM
@@ -208,11 +208,10 @@
             console.log("Payload:", payload);
             console.log("--------------------------------------");
 
-            // Simulate navigation/success after a delay
+            // Navigate to the dashboard after a small delay to let the message show
             setTimeout(() => {
-                showMessage('Success! Your personalized feed is ready.', 'success');
-                // document.location.href = '/dashboard'; // Real-world navigation
-            }, 1500);
+                document.location.href = 'learning_dashboard.html';
+            }, 500);
 
             // --- LLM API INTERACTION SIMULATION END ---
         }
