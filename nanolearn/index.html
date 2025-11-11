@@ -26,8 +26,10 @@
         <!-- Header -->
         <header class="flex items-center justify-between mb-8">
             <div class="text-3xl font-bold text-teal-600">NanoLearn</div>
-            <!-- Profile Icon Placeholder -->
-            <div class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-gray-500 shadow-md">
+            <!-- Profile Icon now clickable -->
+            <div onclick="goToProfileArea()" 
+                 class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-gray-500 shadow-md 
+                        cursor-pointer hover:bg-gray-300 transition-colors duration-200">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             </div>
         </header>
@@ -78,6 +80,12 @@
                 box.classList.add('hidden');
             }, 3000);
         };
+        
+        // NEW FUNCTION: Simulates navigating to the profile area
+        function goToProfileArea() {
+            // Direct link to the simulated profile settings page
+            document.location.href = 'profile_settings.html';
+        }
 
 
         const topics = [
@@ -88,7 +96,7 @@
             { id: 'health', name: 'Health & Everyday Wellness', emoji: '🍎', color: 'bg-red-100', text: 'text-red-600', selected: false },
             { id: 'digital', name: 'Digital Literacy & Tech Skills', emoji: '💻', color: 'bg-indigo-100', text: 'text-indigo-600', selected: false },
             { id: 'life', name: 'Everyday Life Skills', emoji: '💡', color: 'bg-pink-100', text: 'text-pink-600', selected: false },
-            { id: 'cultural', name: 'Cultural Literacy', emoji: '🌍', color: 'bg-cyan-100', text: 'text-cyan-600', selected: false }, // NEW CATEGORY ADDED
+            { id: 'cultural', name: 'Cultural Literacy', emoji: '🌍', color: 'bg-cyan-100', text: 'text-cyan-600', selected: false },
             { id: 'civic', name: 'Civic & Practical Knowledge', emoji: '🏛️', color: 'bg-teal-100', text: 'text-teal-600', selected: false },
         ];
 
