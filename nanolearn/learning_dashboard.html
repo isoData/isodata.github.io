@@ -11,18 +11,21 @@
             font-family: 'Inter', sans-serif;
             background-color: #f7f9fb;
         }
-        /* Skeleton classes are no longer strictly needed but kept for completeness */
         .skeleton {
-            animation: none;
-            background-color: transparent;
+            animation: pulse 1.5s infinite;
+            background-color: #e5e7eb;
             border-radius: 0.5rem;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
     </style>
 </head>
 <body class="min-h-screen">
     <div id="app" class="max-w-xl mx-auto p-4 md:p-6">
 
-        <!-- Header and Back Button -->
+        <!-- Header and User ID -->
         <header class="flex items-center justify-start pt-2 pb-6">
             <button onclick="window.history.back()" class="flex items-center text-teal-600 hover:text-teal-700 transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-left mr-1"><path d="m15 18-6-6 6-6"/></svg>
@@ -35,21 +38,36 @@
             <h1 class="text-3xl font-bold text-gray-800 mb-2">
                 Learning Hub
             </h1>
-            <!-- User ID display removed -->
-            <p class="text-gray-500">Your personal growth story (Mock Data)</p>
+            <p class="text-gray-500" id="user-id-display">Preparing your profile...</p>
         </div>
 
-        <!-- Progress Card (Global) -->
+        <!-- Global Metrics Card (Streak and Badges) -->
         <section class="bg-white p-6 rounded-xl shadow-lg mb-8" id="overall-progress-card">
-            <h2 class="text-xl font-bold text-gray-700 mb-4">Overall Mastery</h2>
+            <h2 class="text-xl font-bold text-gray-700 mb-4">Your Global Metrics</h2>
             
-            <div class="mb-2">
-                <p class="font-semibold text-teal-600 w-full h-6" id="progress-text">Loading...</p>
-            </div>
-            
-            <!-- Progress Bar Container -->
-            <div class="w-full bg-gray-200 rounded-full h-3">
-                <div class="bg-teal-500 h-3 rounded-full transition-all duration-500" style="width: 0;" id="progress-bar"></div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                
+                <!-- 2. Recent Badges (Last 3) - NOW ON THE LEFT (2/3 columns) -->
+                <div class="col-span-1 md:col-span-2">
+                    <h3 class="font-semibold text-gray-700 mb-2 text-center">Last 3 Badges Earned</h3>
+                    <div id="recent-badges-container" class="flex flex-wrap justify-center gap-3">
+                        <!-- Skeleton for badges -->
+                        <div class="skeleton w-10 h-10 rounded-full"></div>
+                        <div class="skeleton w-10 h-10 rounded-full"></div>
+                        <div class="skeleton w-10 h-10 rounded-full"></div>
+                    </div>
+                </div>
+
+                <!-- 1. Daily Streak - NOW ON THE RIGHT (1/3 column) -->
+                <div class="bg-teal-50 p-4 rounded-lg flex items-center justify-between col-span-1 md:col-span-1 border-2 border-teal-200 order-first md:order-none">
+                    <div class="text-center w-full">
+                        <p class="text-3xl font-extrabold text-teal-600" id="daily-streak-value">
+                            <span class="skeleton w-8 h-8 inline-block"></span>
+                        </p>
+                        <p class="text-sm text-gray-500 mt-1">Daily Streak 🔥</p>
+                    </div>
+                </div>
+
             </div>
         </section>
 
@@ -95,43 +113,61 @@
 
     </div>
 
-    <script type="text/javascript">
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // --- MOCK DATA SOURCE (replaces Firestore) ---
-        const mockData = {
-            overall: {
-                maxMasteryPoints: 95, 
-                achievedMasteryPoints: 24, 
-                nextLesson: {
-                    title: "Understanding Web Cookies",
-                    pathTitle: "Digital Literacy",
-                    emoji: "🍪"
-                }
-            },
-            paths: [
-                { id: "finance", title: "Personal Finance", emoji: "💰", requiredPoints: 35, achievedPoints: 12, nextTier: "Budget Builder" },
-                { id: "digital", title: "Digital Literacy & Tech Skills", emoji: "💻", requiredPoints: 20, achievedPoints: 8, nextTier: "Digital Creator" },
-                { id: "life", title: "Everyday Life Skills", emoji: "💡", requiredPoints: 40, achievedPoints: 4, nextTier: "Life Maestro" }
-            ],
-            recentlyCompleted: [
-                { title: "Intro to Cyber Safety", pathTitle: "Digital Literacy", score: 90 },
-                { title: "Saving vs. Investing", pathTitle: "Personal Finance", score: 85 },
-                { title: "Basic Meal Prep", pathTitle: "Everyday Life Skills", score: 92 }
-            ]
-        };
+        // Global variables provided by the environment
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
+        let db;
+        let auth;
+        let userId = null;
+        let isAuthReady = false;
 
-        // --- Utility Functions (unchanged logic) ---
+        // --- Utility Functions ---
 
-        function renderOverallProgress(achievedPoints, maxPoints) {
-            const percentage = maxPoints > 0 ? Math.round((achievedPoints / maxPoints) * 100) : 0;
-            const progressTextEl = document.getElementById('progress-text');
-            const progressBarEl = document.getElementById('progress-bar');
+        /**
+         * Renders the daily streak and recent badges in the global metrics card.
+         * @param {number} dailyStreak - The user's current daily streak.
+         * @param {Array<object>} recentBadges - The last three badges earned.
+         */
+        function renderGlobalMetrics(dailyStreak, recentBadges) {
+            const streakEl = document.getElementById('daily-streak-value');
+            const badgesContainerEl = document.getElementById('recent-badges-container');
 
-            progressTextEl.textContent = `${achievedPoints} / ${maxPoints} Mastery Points Achieved`;
-            progressBarEl.style.width = `${percentage}%`;
+            // 1. Render Streak
+            const streakSpan = streakEl.querySelector('span.skeleton');
+            if (streakSpan) streakSpan.remove();
+            
+            streakEl.textContent = dailyStreak.toString();
+            
+            // 2. Render Badges
+            badgesContainerEl.innerHTML = ''; // Clear skeleton
+            
+            if (recentBadges && recentBadges.length > 0) {
+                recentBadges.slice(0, 3).forEach(badge => {
+                    // Use hover title for accessibility and clarity
+                    const badgeHtml = `
+                        <div class="w-10 h-10 ${badge.color} rounded-full flex items-center justify-center text-xl shadow-lg cursor-help text-white transform hover:scale-110 transition duration-300" title="${badge.name}">
+                            ${badge.emoji}
+                        </div>
+                    `;
+                    badgesContainerEl.insertAdjacentHTML('beforeend', badgeHtml);
+                });
+            } else {
+                 badgesContainerEl.innerHTML = '<p class="text-sm text-gray-500 italic text-center w-full">No badges earned yet. Complete lessons to earn your first badge!</p>';
+            }
         }
 
+
+        /**
+         * Renders the "Next Up" lesson card.
+         * @param {object} lesson - The next lesson object.
+         */
         function renderNextLesson(lesson) {
             const cardEl = document.getElementById('next-lesson-card');
             cardEl.innerHTML = `
@@ -145,38 +181,47 @@
                 </div>
 
                 <a href="#" 
-                   class="w-full md:w-auto px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 transition-colors duration-200 text-center">
+                    class="w-full md:w-auto px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 transition-colors duration-200 text-center">
                     Start Lesson
                 </a>
             `;
         }
 
+        /**
+         * Renders the list of learning paths, including a progress bar and next tier badge.
+         * @param {Array<object>} paths - Array of learning path objects.
+         */
         function renderLearningPaths(paths) {
             const containerEl = document.getElementById('learning-paths-container');
             containerEl.innerHTML = ''; // Clear skeleton/existing content
 
             paths.forEach(path => {
+                // Logic updated to use requiredPoints and achievedPoints
                 const percentage = path.requiredPoints > 0 ? Math.round((path.achievedPoints / path.requiredPoints) * 100) : 0;
                 const nextTier = path.nextTier || 'Next Rank'; 
                 
                 let badgeStyle;
                 
                 if (nextTier === 'Budget Builder') {
-                    const bgColor = 'rgb(220, 252, 231)'; 
-                    const fontColor = 'rgb(22, 163, 74)'; 
+                    // Apply custom RGB colors for Budget Builder
+                    const bgColor = 'rgb(220, 252, 231)'; // light mint green
+                    const fontColor = 'rgb(22, 163, 74)'; // deep green
                     badgeStyle = `style="background-color: ${bgColor}; color: ${fontColor};" class="px-2 py-0.5 rounded-full shadow-sm whitespace-nowrap"`;
 
                 } else if (nextTier === 'Digital Creator') {
-                    const bgColor = 'rgb(224, 231, 255)'; 
-                    const fontColor = 'rgb(79, 70, 229)'; 
+                    // Apply custom RGB colors for Digital Creator
+                    const bgColor = 'rgb(224, 231, 255)'; // light lavender
+                    const fontColor = 'rgb(79, 70, 229)'; // strong indigo
                     badgeStyle = `style="background-color: ${bgColor}; color: ${fontColor};" class="px-2 py-0.5 rounded-full shadow-sm whitespace-nowrap"`;
                 
                 } else if (nextTier === 'Life Maestro') {
-                    const bgColor = 'rgb(252, 231, 243)'; 
-                    const fontColor = 'rgb(219, 39, 119)'; 
+                    // Apply custom RGB colors for Life Maestro
+                    const bgColor = 'rgb(252, 231, 243)'; // light pink
+                    const fontColor = 'rgb(219, 39, 119)'; // strong pink
                     badgeStyle = `style="background-color: ${bgColor}; color: ${fontColor};" class="px-2 py-0.5 rounded-full shadow-sm whitespace-nowrap"`;
 
                 } else {
+                    // Use standard Tailwind classes for other tiers
                     badgeStyle = `class="bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full shadow-sm whitespace-nowrap"`;
                 }
 
@@ -217,9 +262,13 @@
             });
         }
 
+        /**
+         * Renders the list of recently completed lessons.
+         * @param {Array<object>} lessons - Array of completed lesson objects.
+         */
         function renderCompletedLessons(lessons) {
             const containerEl = document.getElementById('recently-completed-container');
-            containerEl.innerHTML = ''; 
+            containerEl.innerHTML = ''; // Clear skeleton/existing content
 
             lessons.forEach(lesson => {
                 const lessonHtml = `
@@ -243,21 +292,150 @@
         }
         
         /**
-         * Initializes the mock application with hardcoded data.
+         * Initializes Firebase and sets up authentication.
          */
-        function initializeMockApp() {
-            console.log("Initializing Mock Dashboard...");
+        async function initializeFirebase() {
+            if (!firebaseConfig) {
+                console.error("Firebase config not found.");
+                document.getElementById('app').innerHTML = '<p class="text-red-600 text-center mt-8">Error: Firebase configuration is missing.</p>';
+                return;
+            }
+
+            try {
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                
+                // Set persistence to session to avoid re-auth on every page load
+                await setPersistence(auth, browserSessionPersistence);
+
+                // Sign in logic
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        isAuthReady = true;
+                        console.log("Firebase Auth Ready. User ID:", userId);
+                        // Updated to display name and emoji instead of raw user ID
+                        document.getElementById('user-id-display').textContent = `Welcome back, Tobias! 👋`; 
+                        // Once authenticated, start listening for data
+                        loadDashboardData();
+                    } else {
+                        userId = null;
+                        isAuthReady = true;
+                        console.log("Signed out or anonymous user.");
+                        // Updated to a generic welcome message
+                        document.getElementById('user-id-display').textContent = `Welcome! Sign in to save progress.`;
+                        loadDashboardData(); // Still try to load data (will likely be empty)
+                    }
+                });
+
+            } catch (error) {
+                console.error("Error during Firebase initialization or sign-in:", error);
+                document.getElementById('app').innerHTML = `<p class="text-red-600 text-center mt-8">Error initializing app: ${error.message}</p>`;
+            }
+        }
+        
+        /**
+         * Sets up the initial data structure if it doesn't exist.
+         */
+        async function setupInitialData() {
+            const dataRef = doc(db, 'artifacts', appId, 'users', userId, 'dashboard_summary', 'progress');
             
-            const overall = mockData.overall;
+            try {
+                const docSnap = await getDoc(dataRef);
+                
+                if (!docSnap.exists()) {
+                    console.log("Creating initial dashboard data...");
+                    const initialData = {
+                        overall: {
+                            maxMasteryPoints: 95, 
+                            achievedMasteryPoints: 24,
+                            dailyStreak: 14, // New field
+                            recentBadges: [ // New field
+                                { name: "First Save", emoji: "💵", color: "bg-green-500" },
+                                { name: "Cyber Rookie", emoji: "🛡️", color: "bg-blue-500" },
+                                { name: "5 Day Run", emoji: "🏃", color: "bg-yellow-500" }
+                            ],
+                            nextLesson: {
+                                title: "Understanding Web Cookies",
+                                pathTitle: "Digital Literacy",
+                                emoji: "🍪"
+                            }
+                        },
+                        paths: [
+                            // Changed to Mastery Points concept (total -> requiredPoints, completed -> achievedPoints)
+                            { id: "finance", title: "Personal Finance", emoji: "💰", requiredPoints: 35, achievedPoints: 12, nextTier: "Budget Builder" },
+                            { id: "digital", title: "Digital Literacy & Tech Skills", emoji: "💻", requiredPoints: 20, achievedPoints: 8, nextTier: "Digital Creator" },
+                            { id: "life", title: "Everyday Life Skills", emoji: "💡", requiredPoints: 40, achievedPoints: 4, nextTier: "Life Maestro" }
+                        ],
+                        recentlyCompleted: [
+                            { title: "Intro to Cyber Safety", pathTitle: "Digital Literacy", score: 90 },
+                            { title: "Saving vs. Investing", pathTitle: "Personal Finance", score: 85 },
+                            { title: "Basic Meal Prep", pathTitle: "Everyday Life Skills", score: 92 }
+                        ]
+                    };
+                    // Use setDoc to create the document
+                    await setDoc(dataRef, initialData);
+                    console.log("Initial data created successfully.");
+                } else {
+                    console.log("Dashboard data already exists.");
+                }
+            } catch (e) {
+                console.error("Error setting up initial data: ", e);
+            }
+        }
+
+        /**
+         * Loads and subscribes to real-time dashboard data.
+         */
+        async function loadDashboardData() {
+            if (!isAuthReady || !userId) {
+                console.warn("Auth not ready or user ID missing. Cannot load data.");
+                return;
+            }
+
+            // Ensure initial data exists for a new user
+            await setupInitialData();
             
-            renderOverallProgress(overall.achievedMasteryPoints, overall.maxMasteryPoints);
-            renderNextLesson(overall.nextLesson);
-            renderLearningPaths(mockData.paths);
-            renderCompletedLessons(mockData.recentlyCompleted);
+            const dataRef = doc(db, 'artifacts', appId, 'users', userId, 'dashboard_summary', 'progress');
+
+            // Use onSnapshot for real-time updates
+            onSnapshot(dataRef, (doc) => {
+                if (doc.exists()) {
+                    const data = doc.data();
+                    console.log("Dashboard data updated:", data);
+
+                    // 1. Render Global Metrics (Streak and Badges)
+                    const overall = data.overall || {};
+                    renderGlobalMetrics(overall.dailyStreak || 0, overall.recentBadges || []);
+
+                    // 2. Render Next Lesson
+                    const nextLesson = overall.nextLesson || { title: "Explore Paths", pathTitle: "N/A", emoji: "🚀" };
+                    renderNextLesson(nextLesson);
+
+                    // 3. Render Learning Paths
+                    renderLearningPaths(data.paths || []);
+
+                    // 4. Render Recently Completed
+                    renderCompletedLessons(data.recentlyCompleted || []);
+
+                } else {
+                    console.log("No dashboard data found (this is normal for new users if setupInitialData hasn't finished)");
+                }
+            }, (error) => {
+                console.error("Error fetching dashboard data:", error);
+                document.getElementById('app').innerHTML = `<p class="text-red-600 text-center mt-8">Error loading data: ${error.message}</p>`;
+            });
         }
 
         // Start the application
-        window.onload = initializeMockApp;
+        window.onload = initializeFirebase;
     </script>
 </body>
 </html>
