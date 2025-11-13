@@ -11,14 +11,23 @@
             font-family: 'Inter', sans-serif;
             background-color: #f7f9fb;
         }
+        .skeleton {
+            animation: pulse 1.5s infinite;
+            background-color: #e5e7eb;
+            border-radius: 0.5rem;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
     </style>
 </head>
 <body class="min-h-screen">
     <div id="app" class="max-w-xl mx-auto p-4 md:p-6">
 
-        <!-- Header and Back Button -->
+        <!-- Header and User ID -->
         <header class="flex items-center justify-start pt-2 pb-6">
-            <button onclick="history.back()" class="flex items-center text-teal-600 hover:text-teal-700 transition-colors">
+            <button onclick="window.history.back()" class="flex items-center text-teal-600 hover:text-teal-700 transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-left mr-1"><path d="m15 18-6-6 6-6"/></svg>
                 <span class="font-semibold text-lg">Back to Home</span>
             </button>
@@ -29,23 +38,22 @@
             <h1 class="text-3xl font-bold text-gray-800 mb-2">
                 Learning Hub
             </h1>
-            <p class="text-gray-500">Your personal growth story</p>
+            <p class="text-gray-500" id="user-id-display">Loading user...</p>
         </div>
 
         <!-- Progress Card (Global) -->
-        <section class="bg-white p-6 rounded-xl shadow-lg mb-8">
-            <h2 class="text-xl font-bold text-gray-700 mb-4">Overall Progress</h2>
+        <section class="bg-white p-6 rounded-xl shadow-lg mb-8" id="overall-progress-card">
+            <h2 class="text-xl font-bold text-gray-700 mb-4">Overall Mastery</h2>
             
-            <div class="flex justify-between items-center mb-2">
-                <!-- Aggregated Data: 24 lessons completed out of 95 total lessons across all paths -->
-                <p class="font-semibold text-teal-600">24 / 95 Lessons Completed</p>
-                <!-- Percentage from profile_settings.html -->
-                <p class="text-sm font-bold text-teal-500">35%</p> 
+            <div class="mb-2">
+                <!-- Text updated to Mastery Points Achieved (now spans full width) -->
+                <p class="font-semibold text-teal-600 skeleton w-full h-6" id="progress-text"></p>
+                <!-- Percentage display removed from HTML -->
             </div>
             
-            <!-- Progress Bar -->
+            <!-- Progress Bar Container -->
             <div class="w-full bg-gray-200 rounded-full h-3">
-                <div class="bg-teal-500 h-3 rounded-full transition-all duration-500" style="width: 35%;"></div>
+                <div class="bg-teal-500 h-3 rounded-full transition-all duration-500" style="width: 0;" id="progress-bar"></div>
             </div>
         </section>
 
@@ -53,64 +61,28 @@
         <section class="mb-10">
             <h2 class="text-xl font-bold text-gray-800 mb-4">Next Up: Start Learning!</h2>
             
-            <div class="bg-indigo-50 p-6 rounded-xl shadow-xl border-4 border-indigo-200 flex flex-col md:flex-row items-start md:items-center justify-between">
-                
-                <div class="flex items-center mb-4 md:mb-0">
-                    <span class="text-4xl mr-4">🍪</span>
-                    <div>
-                        <p class="text-sm font-semibold text-indigo-600 uppercase">Next Global Lesson</p>
-                        <p class="text-2xl font-extrabold text-gray-800">Understanding Web Cookies</p>
-                        <p class="text-gray-600 text-sm">Digital Literacy Path - Learn how websites track your preferences and sessions.</p>
+            <div class="bg-indigo-50 p-6 rounded-xl shadow-xl border-4 border-indigo-200 flex flex-col md:flex-row items-start md:items-center justify-between" id="next-lesson-card">
+                <!-- Content will be dynamically inserted here -->
+                <div class="flex items-center w-full">
+                    <span class="text-4xl mr-4 skeleton w-12 h-12"></span>
+                    <div class="flex-grow">
+                        <p class="text-sm font-semibold text-indigo-600 uppercase skeleton w-1/4 h-4 mb-1"></p>
+                        <p class="text-2xl font-extrabold text-gray-800 skeleton w-3/4 h-8 mb-1"></p>
+                        <p class="text-gray-600 text-sm skeleton w-1/2 h-4"></p>
                     </div>
                 </div>
-
-                <!-- Link to the Web Cookies Lesson Page -->
-                <a href="lesson_cookies.html" 
-                   class="w-full md:w-auto px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 transition-colors duration-200 text-center">
-                    Start Lesson
-                </a>
             </div>
         </section>
         
         <!-- Learning Paths Overview -->
         <section class="mb-8">
             <h2 class="text-xl font-bold text-gray-800 mb-4">Your Active Paths</h2>
-            
-            <!-- Path 1: Finance -->
-            <a href="#" class="block bg-white p-4 rounded-xl shadow-md mb-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
-                <div class="flex items-center">
-                    <span class="text-2xl mr-3">💰</span>
-                    <div>
-                        <p class="font-semibold text-gray-700">Personal Finance</p>
-                        <p class="text-xs text-gray-500">12/35 Lessons (34% Complete)</p>
-                    </div>
-                </div>
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right text-gray-400"><path d="m9 18 6-6-6-6"/></svg>
-            </a>
-
-            <!-- Path 2: Digital Literacy -->
-            <a href="learning_dashboard.html" class="block bg-white p-4 rounded-xl shadow-md mb-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
-                <div class="flex items-center">
-                    <span class="text-2xl mr-3">💻</span>
-                    <div>
-                        <p class="font-semibold text-gray-700">Digital Literacy & Tech Skills</p>
-                        <p class="text-xs text-gray-500">8/20 Lessons (40% Complete)</p>
-                    </div>
-                </div>
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right text-gray-400"><path d="m9 18 6-6-6-6"/></svg>
-            </a>
-
-            <!-- Path 3: Everyday Life Skills -->
-            <a href="#" class="block bg-white p-4 rounded-xl shadow-md mb-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
-                <div class="flex items-center">
-                    <span class="text-2xl mr-3">💡</span>
-                    <div>
-                        <p class="font-semibold text-gray-700">Everyday Life Skills</p>
-                        <p class="text-xs text-gray-500">4/40 Lessons (10% Complete)</p>
-                    </div>
-                </div>
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right text-gray-400"><path d="m9 18 6-6-6-6"/></svg>
-            </a>
+            <div id="learning-paths-container">
+                <!-- Skeleton Loading for Paths -->
+                <div class="block bg-white p-4 rounded-xl shadow-md mb-3 h-20 flex items-center justify-between skeleton"></div>
+                <div class="block bg-white p-4 rounded-xl shadow-md mb-3 h-20 flex items-center justify-between skeleton"></div>
+                <div class="block bg-white p-4 rounded-xl shadow-md mb-3 h-20 flex items-center justify-between skeleton"></div>
+            </div>
         </section>
 
 
@@ -118,45 +90,317 @@
         <section>
             <h2 class="text-xl font-bold text-gray-800 mb-4">Recently Completed Lessons</h2>
 
-            <div class="space-y-3">
-                <!-- Lesson 1 (Digital Literacy) -->
-                <div class="bg-white p-4 rounded-xl shadow-md flex items-center justify-between border-l-4 border-green-500">
-                    <div class="flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-circle text-green-500 mr-3"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
-                        <div>
-                            <p class="font-medium text-gray-700">Intro to Cyber Safety</p>
-                            <span class="text-xs text-gray-400">Digital Literacy Path</span>
-                        </div>
-                    </div>
-                    <span class="text-xs text-gray-500 font-semibold">90%</span>
-                </div>
-                
-                <!-- Lesson 2 (Finance) -->
-                <div class="bg-white p-4 rounded-xl shadow-md flex items-center justify-between border-l-4 border-green-500">
-                    <div class="flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-circle text-green-500 mr-3"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
-                        <div>
-                            <p class="font-medium text-gray-700">Saving vs. Investing</p>
-                            <span class="text-xs text-gray-400">Personal Finance Path</span>
-                        </div>
-                    </div>
-                    <span class="text-xs text-gray-500 font-semibold">85%</span>
-                </div>
-                
-                <!-- Lesson 3 (Life Skills) -->
-                <div class="bg-white p-4 rounded-xl shadow-md flex items-center justify-between border-l-4 border-green-500">
-                    <div classs="flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-circle text-green-500 mr-3"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
-                        <div>
-                            <p class="font-medium text-gray-700">Basic Meal Prep</p>
-                            <span class="text-xs text-gray-400">Everyday Life Skills Path</span>
-                        </div>
-                    </div>
-                    <span class="text-xs text-gray-500 font-semibold">92%</span>
-                </div>
+            <div class="space-y-3" id="recently-completed-container">
+                <!-- Skeleton Loading for Completed Lessons -->
+                <div class="bg-white p-4 rounded-xl shadow-md flex items-center justify-between h-16 skeleton"></div>
+                <div class="bg-white p-4 rounded-xl shadow-md flex items-center justify-between h-16 skeleton"></div>
             </div>
         </section>
 
     </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global variables provided by the environment
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let db;
+        let auth;
+        let userId = null;
+        let isAuthReady = false;
+
+        // --- Utility Functions ---
+
+        /**
+         * Renders the overall progress section, now based on Mastery Points (without percentage).
+         * @param {number} achievedPoints - Mastery points achieved.
+         *@param {number} maxPoints - Maximum possible mastery points.
+         */
+        function renderOverallProgress(achievedPoints, maxPoints) {
+            // Percentage is calculated for the bar width but not displayed.
+            const percentage = maxPoints > 0 ? Math.round((achievedPoints / maxPoints) * 100) : 0;
+            const progressTextEl = document.getElementById('progress-text');
+            const progressBarEl = document.getElementById('progress-bar');
+
+            // Adjust skeleton class removal to w-full as percentage element is removed
+            progressTextEl.classList.remove('skeleton', 'w-full', 'h-6');
+            
+            // Text updated to Mastery Points Achieved
+            progressTextEl.textContent = `${achievedPoints} / ${maxPoints} Mastery Points Achieved`;
+            progressBarEl.style.width = `${percentage}%`;
+        }
+
+        /**
+         * Renders the "Next Up" lesson card.
+         * @param {object} lesson - The next lesson object.
+         */
+        function renderNextLesson(lesson) {
+            const cardEl = document.getElementById('next-lesson-card');
+            cardEl.innerHTML = `
+                <div class="flex items-center mb-4 md:mb-0">
+                    <span class="text-4xl mr-4">${lesson.emoji}</span>
+                    <div>
+                        <p class="text-sm font-semibold text-indigo-600 uppercase">Next Global Lesson</p>
+                        <p class="text-2xl font-extrabold text-gray-800">${lesson.title}</p>
+                        <p class="text-gray-600 text-sm">${lesson.pathTitle} - Click 'Start Lesson' to dive in.</p>
+                    </div>
+                </div>
+
+                <a href="#" 
+                   class="w-full md:w-auto px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 transition-colors duration-200 text-center">
+                    Start Lesson
+                </a>
+            `;
+        }
+
+        /**
+         * Renders the list of learning paths, including a progress bar and next tier badge.
+         * @param {Array<object>} paths - Array of learning path objects.
+         */
+        function renderLearningPaths(paths) {
+            const containerEl = document.getElementById('learning-paths-container');
+            containerEl.innerHTML = ''; // Clear skeleton/existing content
+
+            paths.forEach(path => {
+                // Logic updated to use requiredPoints and achievedPoints
+                const percentage = path.requiredPoints > 0 ? Math.round((path.achievedPoints / path.requiredPoints) * 100) : 0;
+                const nextTier = path.nextTier || 'Next Rank'; 
+                
+                let badgeStyle;
+                
+                if (nextTier === 'Budget Builder') {
+                    // Apply custom RGB colors for Budget Builder
+                    const bgColor = 'rgb(220, 252, 231)'; // light mint green
+                    const fontColor = 'rgb(22, 163, 74)'; // deep green
+                    badgeStyle = `style="background-color: ${bgColor}; color: ${fontColor};" class="px-2 py-0.5 rounded-full shadow-sm whitespace-nowrap"`;
+
+                } else if (nextTier === 'Digital Creator') {
+                    // Apply custom RGB colors for Digital Creator
+                    const bgColor = 'rgb(224, 231, 255)'; // light lavender
+                    const fontColor = 'rgb(79, 70, 229)'; // strong indigo
+                    badgeStyle = `style="background-color: ${bgColor}; color: ${fontColor};" class="px-2 py-0.5 rounded-full shadow-sm whitespace-nowrap"`;
+                
+                } else if (nextTier === 'Life Maestro') {
+                    // Apply custom RGB colors for Life Maestro
+                    const bgColor = 'rgb(252, 231, 243)'; // light pink
+                    const fontColor = 'rgb(219, 39, 119)'; // strong pink
+                    badgeStyle = `style="background-color: ${bgColor}; color: ${fontColor};" class="px-2 py-0.5 rounded-full shadow-sm whitespace-nowrap"`;
+
+                } else {
+                    // Use standard Tailwind classes for other tiers
+                    badgeStyle = `class="bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full shadow-sm whitespace-nowrap"`;
+                }
+
+                const pathHtml = `
+                    <a href="#" class="block bg-white p-4 rounded-xl shadow-md mb-3 flex flex-col hover:bg-gray-50 transition-colors">
+                        
+                        <!-- Header Row (Title and Chevron) -->
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center">
+                                <span class="text-2xl mr-3">${path.emoji}</span>
+                                <p class="font-semibold text-gray-700">${path.title}</p>
+                            </div>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right text-gray-400"><path d="m9 18 6-6-6-6"/></svg>
+                        </div>
+
+                        <!-- Progress Bar and Tier Indicator -->
+                        <div class="relative flex items-center mb-2">
+                            
+                            <!-- Progress Bar Track -->
+                            <div class="w-full bg-gray-200 rounded-full h-2.5 mr-24">
+                                <div class="bg-teal-500 h-2.5 rounded-full transition-all duration-300" style="width: ${percentage}%;"></div>
+                            </div>
+                            
+                            <!-- Next Tier Indication -->
+                            <div class="absolute right-0 top-1/2 transform -translate-y-1/2 flex items-center text-xs font-medium">
+                                <span ${badgeStyle}>${nextTier}</span>
+                                <span class="text-gray-400 ml-1">🚀</span>
+                            </div>
+
+                        </div>
+                        
+                        <!-- Detailed Progress Text (Updated - percentage removed) -->
+                        <p class="text-xs text-gray-500 mt-1">${path.achievedPoints} Mastery Points achieved</p>
+
+                    </a>
+                `;
+                containerEl.insertAdjacentHTML('beforeend', pathHtml);
+            });
+        }
+
+        /**
+         * Renders the list of recently completed lessons.
+         * @param {Array<object>} lessons - Array of completed lesson objects.
+         */
+        function renderCompletedLessons(lessons) {
+            const containerEl = document.getElementById('recently-completed-container');
+            containerEl.innerHTML = ''; // Clear skeleton/existing content
+
+            lessons.forEach(lesson => {
+                const lessonHtml = `
+                    <div class="bg-white p-4 rounded-xl shadow-md flex items-center justify-between border-l-4 border-green-500">
+                        <div class="flex items-center">
+                            <svg xmlns="http://www.w3.org/24/24" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-circle text-green-500 mr-3"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+                            <div>
+                                <p class="font-medium text-gray-700">${lesson.title}</p>
+                                <span class="text-xs text-gray-400">${lesson.pathTitle} Path</span>
+                            </div>
+                        </div>
+                        <span class="text-xs text-gray-500 font-semibold">${lesson.score}%</span>
+                    </div>
+                `;
+                containerEl.insertAdjacentHTML('beforeend', lessonHtml);
+            });
+
+            if (lessons.length === 0) {
+                containerEl.innerHTML = '<p class="text-gray-500 text-center p-4">No lessons completed yet. Start your journey!</p>';
+            }
+        }
+        
+        /**
+         * Initializes Firebase and sets up authentication.
+         */
+        async function initializeFirebase() {
+            if (!firebaseConfig) {
+                console.error("Firebase config not found.");
+                document.getElementById('app').innerHTML = '<p class="text-red-600 text-center mt-8">Error: Firebase configuration is missing.</p>';
+                return;
+            }
+
+            try {
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                
+                // Set persistence to session to avoid re-auth on every page load
+                await setPersistence(auth, browserSessionPersistence);
+
+                // Sign in logic
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        isAuthReady = true;
+                        console.log("Firebase Auth Ready. User ID:", userId);
+                        document.getElementById('user-id-display').textContent = `User ID: ${userId}`;
+                        // Once authenticated, start listening for data
+                        loadDashboardData();
+                    } else {
+                        userId = null;
+                        isAuthReady = true;
+                        console.log("Signed out or anonymous user.");
+                        document.getElementById('user-id-display').textContent = `User ID: Anonymous`;
+                        loadDashboardData(); // Still try to load data (will likely be empty)
+                    }
+                });
+
+            } catch (error) {
+                console.error("Error during Firebase initialization or sign-in:", error);
+                document.getElementById('app').innerHTML = `<p class="text-red-600 text-center mt-8">Error initializing app: ${error.message}</p>`;
+            }
+        }
+        
+        /**
+         * Sets up the initial data structure if it doesn't exist.
+         * Note: Fields are updated to Mastery Point concepts.
+         */
+        async function setupInitialData() {
+            const dataRef = doc(db, 'artifacts', appId, 'users', userId, 'dashboard_summary', 'progress');
+            
+            try {
+                const docSnap = await getDoc(dataRef);
+                
+                if (!docSnap.exists()) {
+                    console.log("Creating initial dashboard data...");
+                    const initialData = {
+                        overall: {
+                            // Changed to Mastery Points concept
+                            maxMasteryPoints: 95, 
+                            achievedMasteryPoints: 24, 
+                            nextLesson: {
+                                title: "Understanding Web Cookies",
+                                pathTitle: "Digital Literacy",
+                                emoji: "🍪"
+                            }
+                        },
+                        paths: [
+                            // Changed to Mastery Points concept (total -> requiredPoints, completed -> achievedPoints)
+                            { id: "finance", title: "Personal Finance", emoji: "💰", requiredPoints: 35, achievedPoints: 12, nextTier: "Budget Builder" },
+                            { id: "digital", title: "Digital Literacy & Tech Skills", emoji: "💻", requiredPoints: 20, achievedPoints: 8, nextTier: "Digital Creator" },
+                            { id: "life", title: "Everyday Life Skills", emoji: "💡", requiredPoints: 40, achievedPoints: 4, nextTier: "Life Maestro" }
+                        ],
+                        recentlyCompleted: [
+                            { title: "Intro to Cyber Safety", pathTitle: "Digital Literacy", score: 90 },
+                            { title: "Saving vs. Investing", pathTitle: "Personal Finance", score: 85 },
+                            { title: "Basic Meal Prep", pathTitle: "Everyday Life Skills", score: 92 }
+                        ]
+                    };
+                    // Use setDoc to create the document
+                    await setDoc(dataRef, initialData);
+                    console.log("Initial data created successfully.");
+                } else {
+                    console.log("Dashboard data already exists.");
+                }
+            } catch (e) {
+                console.error("Error setting up initial data: ", e);
+            }
+        }
+
+        /**
+         * Loads and subscribes to real-time dashboard data.
+         */
+        async function loadDashboardData() {
+            if (!isAuthReady || !userId) {
+                console.warn("Auth not ready or user ID missing. Cannot load data.");
+                return;
+            }
+
+            // Ensure initial data exists for a new user
+            await setupInitialData();
+            
+            const dataRef = doc(db, 'artifacts', appId, 'users', userId, 'dashboard_summary', 'progress');
+
+            // Use onSnapshot for real-time updates
+            onSnapshot(dataRef, (doc) => {
+                if (doc.exists()) {
+                    const data = doc.data();
+                    console.log("Dashboard data updated:", data);
+
+                    // 1. Render Overall Progress (using new data fields)
+                    const overall = data.overall || {};
+                    renderOverallProgress(overall.achievedMasteryPoints || 0, overall.maxMasteryPoints || 0);
+
+                    // 2. Render Next Lesson
+                    const nextLesson = overall.nextLesson || { title: "Explore Paths", pathTitle: "N/A", emoji: "🚀" };
+                    renderNextLesson(nextLesson);
+
+                    // 3. Render Learning Paths
+                    renderLearningPaths(data.paths || []);
+
+                    // 4. Render Recently Completed
+                    renderCompletedLessons(data.recentlyCompleted || []);
+
+                } else {
+                    console.log("No dashboard data found (this is normal for new users if setupInitialData hasn't finished)");
+                }
+            }, (error) => {
+                console.error("Error fetching dashboard data:", error);
+                document.getElementById('app').innerHTML = `<p class="text-red-600 text-center mt-8">Error loading data: ${error.message}</p>`;
+            });
+        }
+
+        // Start the application
+        window.onload = initializeFirebase;
+    </script>
 </body>
 </html>
