@@ -11,21 +11,18 @@
             font-family: 'Inter', sans-serif;
             background-color: #f7f9fb;
         }
+        /* Skeleton classes are no longer strictly needed but kept for completeness */
         .skeleton {
-            animation: pulse 1.5s infinite;
-            background-color: #e5e7eb;
+            animation: none;
+            background-color: transparent;
             border-radius: 0.5rem;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
         }
     </style>
 </head>
 <body class="min-h-screen">
     <div id="app" class="max-w-xl mx-auto p-4 md:p-6">
 
-        <!-- Header and User ID -->
+        <!-- Header and Back Button -->
         <header class="flex items-center justify-start pt-2 pb-6">
             <button onclick="window.history.back()" class="flex items-center text-teal-600 hover:text-teal-700 transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-left mr-1"><path d="m15 18-6-6 6-6"/></svg>
@@ -38,7 +35,8 @@
             <h1 class="text-3xl font-bold text-gray-800 mb-2">
                 Learning Hub
             </h1>
-            <p class="text-gray-500" id="user-id-display">Loading user...</p>
+            <!-- User ID display removed -->
+            <p class="text-gray-500">Your personal growth story (Mock Data)</p>
         </div>
 
         <!-- Progress Card (Global) -->
@@ -46,9 +44,7 @@
             <h2 class="text-xl font-bold text-gray-700 mb-4">Overall Mastery</h2>
             
             <div class="mb-2">
-                <!-- Text updated to Mastery Points Achieved (now spans full width) -->
-                <p class="font-semibold text-teal-600 skeleton w-full h-6" id="progress-text"></p>
-                <!-- Percentage display removed from HTML -->
+                <p class="font-semibold text-teal-600 w-full h-6" id="progress-text">Loading...</p>
             </div>
             
             <!-- Progress Bar Container -->
@@ -99,46 +95,43 @@
 
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    <script type="text/javascript">
 
-        // Global variables provided by the environment
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        // --- MOCK DATA SOURCE (replaces Firestore) ---
+        const mockData = {
+            overall: {
+                maxMasteryPoints: 95, 
+                achievedMasteryPoints: 24, 
+                nextLesson: {
+                    title: "Understanding Web Cookies",
+                    pathTitle: "Digital Literacy",
+                    emoji: "🍪"
+                }
+            },
+            paths: [
+                { id: "finance", title: "Personal Finance", emoji: "💰", requiredPoints: 35, achievedPoints: 12, nextTier: "Budget Builder" },
+                { id: "digital", title: "Digital Literacy & Tech Skills", emoji: "💻", requiredPoints: 20, achievedPoints: 8, nextTier: "Digital Creator" },
+                { id: "life", title: "Everyday Life Skills", emoji: "💡", requiredPoints: 40, achievedPoints: 4, nextTier: "Life Maestro" }
+            ],
+            recentlyCompleted: [
+                { title: "Intro to Cyber Safety", pathTitle: "Digital Literacy", score: 90 },
+                { title: "Saving vs. Investing", pathTitle: "Personal Finance", score: 85 },
+                { title: "Basic Meal Prep", pathTitle: "Everyday Life Skills", score: 92 }
+            ]
+        };
 
-        let db;
-        let auth;
-        let userId = null;
-        let isAuthReady = false;
 
-        // --- Utility Functions ---
+        // --- Utility Functions (unchanged logic) ---
 
-        /**
-         * Renders the overall progress section, now based on Mastery Points (without percentage).
-         * @param {number} achievedPoints - Mastery points achieved.
-         *@param {number} maxPoints - Maximum possible mastery points.
-         */
         function renderOverallProgress(achievedPoints, maxPoints) {
-            // Percentage is calculated for the bar width but not displayed.
             const percentage = maxPoints > 0 ? Math.round((achievedPoints / maxPoints) * 100) : 0;
             const progressTextEl = document.getElementById('progress-text');
             const progressBarEl = document.getElementById('progress-bar');
 
-            // Adjust skeleton class removal to w-full as percentage element is removed
-            progressTextEl.classList.remove('skeleton', 'w-full', 'h-6');
-            
-            // Text updated to Mastery Points Achieved
             progressTextEl.textContent = `${achievedPoints} / ${maxPoints} Mastery Points Achieved`;
             progressBarEl.style.width = `${percentage}%`;
         }
 
-        /**
-         * Renders the "Next Up" lesson card.
-         * @param {object} lesson - The next lesson object.
-         */
         function renderNextLesson(lesson) {
             const cardEl = document.getElementById('next-lesson-card');
             cardEl.innerHTML = `
@@ -158,41 +151,32 @@
             `;
         }
 
-        /**
-         * Renders the list of learning paths, including a progress bar and next tier badge.
-         * @param {Array<object>} paths - Array of learning path objects.
-         */
         function renderLearningPaths(paths) {
             const containerEl = document.getElementById('learning-paths-container');
             containerEl.innerHTML = ''; // Clear skeleton/existing content
 
             paths.forEach(path => {
-                // Logic updated to use requiredPoints and achievedPoints
                 const percentage = path.requiredPoints > 0 ? Math.round((path.achievedPoints / path.requiredPoints) * 100) : 0;
                 const nextTier = path.nextTier || 'Next Rank'; 
                 
                 let badgeStyle;
                 
                 if (nextTier === 'Budget Builder') {
-                    // Apply custom RGB colors for Budget Builder
-                    const bgColor = 'rgb(220, 252, 231)'; // light mint green
-                    const fontColor = 'rgb(22, 163, 74)'; // deep green
+                    const bgColor = 'rgb(220, 252, 231)'; 
+                    const fontColor = 'rgb(22, 163, 74)'; 
                     badgeStyle = `style="background-color: ${bgColor}; color: ${fontColor};" class="px-2 py-0.5 rounded-full shadow-sm whitespace-nowrap"`;
 
                 } else if (nextTier === 'Digital Creator') {
-                    // Apply custom RGB colors for Digital Creator
-                    const bgColor = 'rgb(224, 231, 255)'; // light lavender
-                    const fontColor = 'rgb(79, 70, 229)'; // strong indigo
+                    const bgColor = 'rgb(224, 231, 255)'; 
+                    const fontColor = 'rgb(79, 70, 229)'; 
                     badgeStyle = `style="background-color: ${bgColor}; color: ${fontColor};" class="px-2 py-0.5 rounded-full shadow-sm whitespace-nowrap"`;
                 
                 } else if (nextTier === 'Life Maestro') {
-                    // Apply custom RGB colors for Life Maestro
-                    const bgColor = 'rgb(252, 231, 243)'; // light pink
-                    const fontColor = 'rgb(219, 39, 119)'; // strong pink
+                    const bgColor = 'rgb(252, 231, 243)'; 
+                    const fontColor = 'rgb(219, 39, 119)'; 
                     badgeStyle = `style="background-color: ${bgColor}; color: ${fontColor};" class="px-2 py-0.5 rounded-full shadow-sm whitespace-nowrap"`;
 
                 } else {
-                    // Use standard Tailwind classes for other tiers
                     badgeStyle = `class="bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full shadow-sm whitespace-nowrap"`;
                 }
 
@@ -233,13 +217,9 @@
             });
         }
 
-        /**
-         * Renders the list of recently completed lessons.
-         * @param {Array<object>} lessons - Array of completed lesson objects.
-         */
         function renderCompletedLessons(lessons) {
             const containerEl = document.getElementById('recently-completed-container');
-            containerEl.innerHTML = ''; // Clear skeleton/existing content
+            containerEl.innerHTML = ''; 
 
             lessons.forEach(lesson => {
                 const lessonHtml = `
@@ -263,144 +243,21 @@
         }
         
         /**
-         * Initializes Firebase and sets up authentication.
+         * Initializes the mock application with hardcoded data.
          */
-        async function initializeFirebase() {
-            if (!firebaseConfig) {
-                console.error("Firebase config not found.");
-                document.getElementById('app').innerHTML = '<p class="text-red-600 text-center mt-8">Error: Firebase configuration is missing.</p>';
-                return;
-            }
-
-            try {
-                const app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-                
-                // Set persistence to session to avoid re-auth on every page load
-                await setPersistence(auth, browserSessionPersistence);
-
-                // Sign in logic
-                if (initialAuthToken) {
-                    await signInWithCustomToken(auth, initialAuthToken);
-                } else {
-                    await signInAnonymously(auth);
-                }
-
-                onAuthStateChanged(auth, (user) => {
-                    if (user) {
-                        userId = user.uid;
-                        isAuthReady = true;
-                        console.log("Firebase Auth Ready. User ID:", userId);
-                        document.getElementById('user-id-display').textContent = `User ID: ${userId}`;
-                        // Once authenticated, start listening for data
-                        loadDashboardData();
-                    } else {
-                        userId = null;
-                        isAuthReady = true;
-                        console.log("Signed out or anonymous user.");
-                        document.getElementById('user-id-display').textContent = `User ID: Anonymous`;
-                        loadDashboardData(); // Still try to load data (will likely be empty)
-                    }
-                });
-
-            } catch (error) {
-                console.error("Error during Firebase initialization or sign-in:", error);
-                document.getElementById('app').innerHTML = `<p class="text-red-600 text-center mt-8">Error initializing app: ${error.message}</p>`;
-            }
-        }
-        
-        /**
-         * Sets up the initial data structure if it doesn't exist.
-         * Note: Fields are updated to Mastery Point concepts.
-         */
-        async function setupInitialData() {
-            const dataRef = doc(db, 'artifacts', appId, 'users', userId, 'dashboard_summary', 'progress');
+        function initializeMockApp() {
+            console.log("Initializing Mock Dashboard...");
             
-            try {
-                const docSnap = await getDoc(dataRef);
-                
-                if (!docSnap.exists()) {
-                    console.log("Creating initial dashboard data...");
-                    const initialData = {
-                        overall: {
-                            // Changed to Mastery Points concept
-                            maxMasteryPoints: 95, 
-                            achievedMasteryPoints: 24, 
-                            nextLesson: {
-                                title: "Understanding Web Cookies",
-                                pathTitle: "Digital Literacy",
-                                emoji: "🍪"
-                            }
-                        },
-                        paths: [
-                            // Changed to Mastery Points concept (total -> requiredPoints, completed -> achievedPoints)
-                            { id: "finance", title: "Personal Finance", emoji: "💰", requiredPoints: 35, achievedPoints: 12, nextTier: "Budget Builder" },
-                            { id: "digital", title: "Digital Literacy & Tech Skills", emoji: "💻", requiredPoints: 20, achievedPoints: 8, nextTier: "Digital Creator" },
-                            { id: "life", title: "Everyday Life Skills", emoji: "💡", requiredPoints: 40, achievedPoints: 4, nextTier: "Life Maestro" }
-                        ],
-                        recentlyCompleted: [
-                            { title: "Intro to Cyber Safety", pathTitle: "Digital Literacy", score: 90 },
-                            { title: "Saving vs. Investing", pathTitle: "Personal Finance", score: 85 },
-                            { title: "Basic Meal Prep", pathTitle: "Everyday Life Skills", score: 92 }
-                        ]
-                    };
-                    // Use setDoc to create the document
-                    await setDoc(dataRef, initialData);
-                    console.log("Initial data created successfully.");
-                } else {
-                    console.log("Dashboard data already exists.");
-                }
-            } catch (e) {
-                console.error("Error setting up initial data: ", e);
-            }
-        }
-
-        /**
-         * Loads and subscribes to real-time dashboard data.
-         */
-        async function loadDashboardData() {
-            if (!isAuthReady || !userId) {
-                console.warn("Auth not ready or user ID missing. Cannot load data.");
-                return;
-            }
-
-            // Ensure initial data exists for a new user
-            await setupInitialData();
+            const overall = mockData.overall;
             
-            const dataRef = doc(db, 'artifacts', appId, 'users', userId, 'dashboard_summary', 'progress');
-
-            // Use onSnapshot for real-time updates
-            onSnapshot(dataRef, (doc) => {
-                if (doc.exists()) {
-                    const data = doc.data();
-                    console.log("Dashboard data updated:", data);
-
-                    // 1. Render Overall Progress (using new data fields)
-                    const overall = data.overall || {};
-                    renderOverallProgress(overall.achievedMasteryPoints || 0, overall.maxMasteryPoints || 0);
-
-                    // 2. Render Next Lesson
-                    const nextLesson = overall.nextLesson || { title: "Explore Paths", pathTitle: "N/A", emoji: "🚀" };
-                    renderNextLesson(nextLesson);
-
-                    // 3. Render Learning Paths
-                    renderLearningPaths(data.paths || []);
-
-                    // 4. Render Recently Completed
-                    renderCompletedLessons(data.recentlyCompleted || []);
-
-                } else {
-                    console.log("No dashboard data found (this is normal for new users if setupInitialData hasn't finished)");
-                }
-            }, (error) => {
-                console.error("Error fetching dashboard data:", error);
-                document.getElementById('app').innerHTML = `<p class="text-red-600 text-center mt-8">Error loading data: ${error.message}</p>`;
-            });
+            renderOverallProgress(overall.achievedMasteryPoints, overall.maxMasteryPoints);
+            renderNextLesson(overall.nextLesson);
+            renderLearningPaths(mockData.paths);
+            renderCompletedLessons(mockData.recentlyCompleted);
         }
 
         // Start the application
-        window.onload = initializeFirebase;
+        window.onload = initializeMockApp;
     </script>
 </body>
 </html>
