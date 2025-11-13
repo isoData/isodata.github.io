@@ -38,7 +38,7 @@
             <h1 class="text-3xl font-bold text-gray-800 mb-2">
                 Learning Hub
             </h1>
-            <p class="text-gray-500" id="user-id-display">Preparing your profile...</p>
+            <p class="text-gray-500" id="user-id-display">Loading...</p>
         </div>
 
         <!-- Global Metrics Card (Streak and Badges) -->
@@ -113,20 +113,35 @@
 
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // Global variables provided by the environment
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-
-        let db;
-        let auth;
-        let userId = null;
-        let isAuthReady = false;
+    <script>
+        // --- Static Mock Data ---
+        const dashboardData = {
+            overall: {
+                maxMasteryPoints: 95, 
+                achievedMasteryPoints: 24,
+                dailyStreak: 14, 
+                recentBadges: [ 
+                    { name: "First Save", emoji: "💵", color: "bg-green-500" },
+                    { name: "Cyber Rookie", emoji: "🛡️", color: "bg-blue-500" },
+                    { name: "5 Day Run", emoji: "🏃", color: "bg-yellow-500" }
+                ],
+                nextLesson: {
+                    title: "Understanding Web Cookies",
+                    pathTitle: "Digital Literacy",
+                    emoji: "🍪"
+                }
+            },
+            paths: [
+                { id: "finance", title: "Personal Finance", emoji: "💰", requiredPoints: 35, achievedPoints: 12, nextTier: "Budget Builder" },
+                { id: "digital", title: "Digital Literacy & Tech Skills", emoji: "💻", requiredPoints: 20, achievedPoints: 8, nextTier: "Digital Creator" },
+                { id: "life", title: "Everyday Life Skills", emoji: "💡", requiredPoints: 40, achievedPoints: 4, nextTier: "Life Maestro" }
+            ],
+            recentlyCompleted: [
+                { title: "Intro to Cyber Safety", pathTitle: "Digital Literacy", score: 90 },
+                { title: "Saving vs. Investing", pathTitle: "Personal Finance", score: 85 },
+                { title: "Basic Meal Prep", pathTitle: "Everyday Life Skills", score: 92 }
+            ]
+        };
 
         // --- Utility Functions ---
 
@@ -292,150 +307,24 @@
         }
         
         /**
-         * Initializes Firebase and sets up authentication.
+         * Initializes the static application view.
          */
-        async function initializeFirebase() {
-            if (!firebaseConfig) {
-                console.error("Firebase config not found.");
-                document.getElementById('app').innerHTML = '<p class="text-red-600 text-center mt-8">Error: Firebase configuration is missing.</p>';
-                return;
-            }
-
-            try {
-                const app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-                
-                // Set persistence to session to avoid re-auth on every page load
-                await setPersistence(auth, browserSessionPersistence);
-
-                // Sign in logic
-                if (initialAuthToken) {
-                    await signInWithCustomToken(auth, initialAuthToken);
-                } else {
-                    await signInAnonymously(auth);
-                }
-
-                onAuthStateChanged(auth, (user) => {
-                    if (user) {
-                        userId = user.uid;
-                        isAuthReady = true;
-                        console.log("Firebase Auth Ready. User ID:", userId);
-                        // Updated to display name and emoji instead of raw user ID
-                        document.getElementById('user-id-display').textContent = `Welcome back, Tobias! 👋`; 
-                        // Once authenticated, start listening for data
-                        loadDashboardData();
-                    } else {
-                        userId = null;
-                        isAuthReady = true;
-                        console.log("Signed out or anonymous user.");
-                        // Updated to a generic welcome message
-                        document.getElementById('user-id-display').textContent = `Welcome! Sign in to save progress.`;
-                        loadDashboardData(); // Still try to load data (will likely be empty)
-                    }
-                });
-
-            } catch (error) {
-                console.error("Error during Firebase initialization or sign-in:", error);
-                document.getElementById('app').innerHTML = `<p class="text-red-600 text-center mt-8">Error initializing app: ${error.message}</p>`;
-            }
-        }
-        
-        /**
-         * Sets up the initial data structure if it doesn't exist.
-         */
-        async function setupInitialData() {
-            const dataRef = doc(db, 'artifacts', appId, 'users', userId, 'dashboard_summary', 'progress');
+        function initApp() {
+            // Set the user display text directly
+            document.getElementById('user-id-display').textContent = `Welcome back, Tobias! 👋 (Static Content)`; 
             
-            try {
-                const docSnap = await getDoc(dataRef);
-                
-                if (!docSnap.exists()) {
-                    console.log("Creating initial dashboard data...");
-                    const initialData = {
-                        overall: {
-                            maxMasteryPoints: 95, 
-                            achievedMasteryPoints: 24,
-                            dailyStreak: 14, // New field
-                            recentBadges: [ // New field
-                                { name: "First Save", emoji: "💵", color: "bg-green-500" },
-                                { name: "Cyber Rookie", emoji: "🛡️", color: "bg-blue-500" },
-                                { name: "5 Day Run", emoji: "🏃", color: "bg-yellow-500" }
-                            ],
-                            nextLesson: {
-                                title: "Understanding Web Cookies",
-                                pathTitle: "Digital Literacy",
-                                emoji: "🍪"
-                            }
-                        },
-                        paths: [
-                            // Changed to Mastery Points concept (total -> requiredPoints, completed -> achievedPoints)
-                            { id: "finance", title: "Personal Finance", emoji: "💰", requiredPoints: 35, achievedPoints: 12, nextTier: "Budget Builder" },
-                            { id: "digital", title: "Digital Literacy & Tech Skills", emoji: "💻", requiredPoints: 20, achievedPoints: 8, nextTier: "Digital Creator" },
-                            { id: "life", title: "Everyday Life Skills", emoji: "💡", requiredPoints: 40, achievedPoints: 4, nextTier: "Life Maestro" }
-                        ],
-                        recentlyCompleted: [
-                            { title: "Intro to Cyber Safety", pathTitle: "Digital Literacy", score: 90 },
-                            { title: "Saving vs. Investing", pathTitle: "Personal Finance", score: 85 },
-                            { title: "Basic Meal Prep", pathTitle: "Everyday Life Skills", score: 92 }
-                        ]
-                    };
-                    // Use setDoc to create the document
-                    await setDoc(dataRef, initialData);
-                    console.log("Initial data created successfully.");
-                } else {
-                    console.log("Dashboard data already exists.");
-                }
-            } catch (e) {
-                console.error("Error setting up initial data: ", e);
-            }
-        }
+            // Render all components using the static data
+            const data = dashboardData;
+            const overall = data.overall;
 
-        /**
-         * Loads and subscribes to real-time dashboard data.
-         */
-        async function loadDashboardData() {
-            if (!isAuthReady || !userId) {
-                console.warn("Auth not ready or user ID missing. Cannot load data.");
-                return;
-            }
-
-            // Ensure initial data exists for a new user
-            await setupInitialData();
-            
-            const dataRef = doc(db, 'artifacts', appId, 'users', userId, 'dashboard_summary', 'progress');
-
-            // Use onSnapshot for real-time updates
-            onSnapshot(dataRef, (doc) => {
-                if (doc.exists()) {
-                    const data = doc.data();
-                    console.log("Dashboard data updated:", data);
-
-                    // 1. Render Global Metrics (Streak and Badges)
-                    const overall = data.overall || {};
-                    renderGlobalMetrics(overall.dailyStreak || 0, overall.recentBadges || []);
-
-                    // 2. Render Next Lesson
-                    const nextLesson = overall.nextLesson || { title: "Explore Paths", pathTitle: "N/A", emoji: "🚀" };
-                    renderNextLesson(nextLesson);
-
-                    // 3. Render Learning Paths
-                    renderLearningPaths(data.paths || []);
-
-                    // 4. Render Recently Completed
-                    renderCompletedLessons(data.recentlyCompleted || []);
-
-                } else {
-                    console.log("No dashboard data found (this is normal for new users if setupInitialData hasn't finished)");
-                }
-            }, (error) => {
-                console.error("Error fetching dashboard data:", error);
-                document.getElementById('app').innerHTML = `<p class="text-red-600 text-center mt-8">Error loading data: ${error.message}</p>`;
-            });
+            renderGlobalMetrics(overall.dailyStreak || 0, overall.recentBadges || []);
+            renderNextLesson(overall.nextLesson || { title: "Explore Paths", pathTitle: "N/A", emoji: "🚀" });
+            renderLearningPaths(data.paths || []);
+            renderCompletedLessons(data.recentlyCompleted || []);
         }
 
         // Start the application
-        window.onload = initializeFirebase;
+        window.onload = initApp;
     </script>
 </body>
 </html>
