@@ -13,137 +13,177 @@
         }
     </style>
 </head>
-<body class="min-h-screen">
+<body class="min-h-screen pb-12">
     <div id="app" class="max-w-xl mx-auto p-4 md:p-6">
 
         <!-- Header and Back Button -->
         <header class="flex items-center justify-start pt-2 pb-6">
             <button onclick="history.back()" class="flex items-center text-teal-600 hover:text-teal-700 transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-left mr-1"><path d="m15 18-6-6 6-6"/></svg>
-                <span class="font-semibold text-lg">Back</span>
+                <span class="font-semibold text-lg">Back to Hub</span>
             </button>
         </header>
 
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">User Profile</h1>
+
         <!-- Profile Summary -->
-        <section class="mb-8 flex items-center bg-white p-4 rounded-xl shadow-lg">
-            <div class="w-16 h-16 bg-teal-500 rounded-full flex items-center justify-center text-white text-3xl font-bold mr-4 shadow-md">
-                A
+        <section class="mb-8 flex items-center bg-white p-6 rounded-xl shadow-lg border-b-4 border-indigo-500">
+            <div class="w-16 h-16 bg-indigo-600 rounded-full flex items-center justify-center text-white text-3xl font-bold mr-4 shadow-xl">
+                T
             </div>
             <div>
-                <h1 class="text-2xl font-bold text-gray-800">Tobias Burri</h1>
+                <h2 class="text-2xl font-bold text-gray-800" id="user-name">Tobias Burri</h2>
                 <p class="text-sm text-gray-500">Learner since 2024</p>
             </div>
         </section>
         
         <!-- Progress and Streak -->
-        <section class="grid grid-cols-2 gap-4 mb-8">
+        <section class="grid grid-cols-2 gap-4 mb-10">
             <!-- Learning Streak Card -->
-            <div class="bg-white p-4 rounded-xl shadow-md border-b-4 border-red-500">
-                <div class="text-3xl font-extrabold text-red-500">🔥 14</div>
+            <div class="bg-white p-4 rounded-xl shadow-md border-2 border-red-200">
+                <div class="text-3xl font-extrabold text-red-500 flex items-center mb-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-flame mr-2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07.74-2.43 2.07-3 3-.6-1.45-1.73-2.78-3-4-1.45 1.25-2 2-2 3s1.5 2 2.5 2c-.5 1.38.5 2 1 3 1.38-.5 2.07-2.43 3-3Z"/><path d="M7.5 19.5c.95 2.5 4.3 2.5 5.2 0M12.5 16.5c.57 1.3 1.7 1.3 2.2 0"/></svg>
+                    <span id="profile-streak-value">14</span>
+                </div>
                 <p class="text-sm text-gray-500 font-medium">Day Streak</p>
                 <p class="text-xs text-gray-400 mt-1">Keep the momentum!</p>
             </div>
 
             <!-- Overall Progress Card -->
-            <div class="bg-white p-4 rounded-xl shadow-md border-b-4 border-teal-500">
-                <div class="text-3xl font-extrabold text-teal-500">35%</div>
+            <div class="bg-white p-4 rounded-xl shadow-md border-2 border-teal-200">
+                <div class="text-3xl font-extrabold text-teal-600 mb-2" id="profile-overall-progress-percent">35%</div>
                 <p class="text-sm text-gray-500 font-medium mb-2">Overall Progress</p>
                 <div class="w-full bg-gray-200 rounded-full h-2.5">
-                    <div class="bg-teal-500 h-2.5 rounded-full" style="width: 35%"></div>
+                    <div id="profile-overall-progress-bar" class="bg-teal-500 h-2.5 rounded-full transition-all duration-300" style="width: 35%"></div>
                 </div>
             </div>
         </section>
 
         <!-- Current Learning Paths -->
-        <section class="mb-8">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">My Focus Paths</h2>
-            
-            <!-- Learning Path 1: Finance -->
-            <div class="bg-white p-4 rounded-xl shadow-md mb-3 flex items-center justify-between border border-gray-100">
-                <div class="flex items-center">
-                    <span class="text-2xl mr-3">💰</span>
-                    <div>
-                        <p class="font-semibold text-gray-700">Personal Finance</p>
-                        <p class="text-xs text-gray-500">12/35 Lessons Completed</p>
-                    </div>
-                </div>
-                <div class="w-24 bg-gray-200 rounded-full h-2.5">
-                    <div class="bg-green-500 h-2.5 rounded-full" style="width: 34%"></div>
-                </div>
-            </div>
-
-            <!-- Learning Path 2: Digital Literacy -->
-            <div class="bg-white p-4 rounded-xl shadow-md mb-3 flex items-center justify-between border border-gray-100">
-                <div class="flex items-center">
-                    <span class="text-2xl mr-3">💻</span>
-                    <div>
-                        <p class="font-semibold text-gray-700">Digital Literacy</p>
-                        <p class="text-xs text-gray-500">8/20 Lessons Completed</p>
-                    </div>
-                </div>
-                <div class="w-24 bg-gray-200 rounded-full h-2.5">
-                    <div class="bg-indigo-500 h-2.5 rounded-full" style="width: 40%"></div>
-                </div>
-            </div>
-
-            <!-- Learning Path 3: Everyday Life Skills -->
-            <div class="bg-white p-4 rounded-xl shadow-md mb-3 flex items-center justify-between border border-gray-100">
-                <div class="flex items-center">
-                    <span class="text-2xl mr-3">💡</span>
-                    <div>
-                        <p class="font-semibold text-gray-700">Everyday Life Skills</p>
-                        <p class="text-xs text-gray-500">4/40 Lessons Completed</p>
-                    </div>
-                </div>
-                <div class="w-24 bg-gray-200 rounded-full h-2.5">
-                    <div class="bg-pink-500 h-2.5 rounded-full" style="width: 10%"></div>
-                </div>
+        <section class="mb-10">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">My Active Paths</h2>
+            <div id="profile-paths-container" class="space-y-3">
+                <!-- Paths will be injected here -->
             </div>
         </section>
         
-        <!-- Achievements -->
-        <section class="mb-8">
+        <!-- Achievements / Badges -->
+        <section class="mb-10">
             <h2 class="text-xl font-bold text-gray-800 mb-4">Gained Achievements</h2>
-            <div class="grid grid-cols-2 gap-4">
-                
-                <!-- Achievement 1: First Step -->
-                <div class="bg-teal-100 p-4 rounded-xl shadow-md flex flex-col items-center text-center border-2 border-teal-500">
-                    <span class="text-4xl mb-2">🏅</span>
-                    <p class="font-bold text-teal-800">The Initiate</p>
-                    <p class="text-xs text-gray-600">Completed 10 total lessons.</p>
-                </div>
-
-                <!-- Achievement 2: Finance Foundation -->
-                <div class="bg-green-100 p-4 rounded-xl shadow-md flex flex-col items-center text-center border-2 border-green-500">
-                    <span class="text-4xl mb-2">🏦</span>
-                    <p class="font-bold text-green-800">Finance Foundations</p>
-                    <p class="text-xs text-gray-600">Finished the 'Budget Basics' module.</p>
-                </div>
+            <div id="profile-badges-container" class="flex flex-wrap gap-4 justify-center">
+                <!-- Badges will be injected here -->
             </div>
-        </section>
-
-        <!-- Friends / Community -->
-        <section class="mb-8">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">Learning Buddies (3)</h2>
-            <div class="flex -space-x-2 overflow-hidden items-center">
-                <img class="inline-block h-10 w-10 rounded-full ring-2 ring-white" src="https://placehold.co/40x40/007AFF/ffffff?text=J" alt="Friend 1">
-                <img class="inline-block h-10 w-10 rounded-full ring-2 ring-white" src="https://placehold.co/40x40/FF3B30/ffffff?text=M" alt="Friend 2">
-                <img class="inline-block h-10 w-10 rounded-full ring-2 ring-white" src="https://placehold.co/40x40/FF9500/ffffff?text=S" alt="Friend 3">
-                <div class="h-10 w-10 rounded-full bg-gray-300 ring-2 ring-white flex items-center justify-center text-sm font-semibold text-gray-600 cursor-pointer hover:bg-gray-400 transition-colors">
-                    +
-                </div>
-            </div>
-            <p class="text-sm text-gray-500 mt-3">Connect to compare progress!</p>
+            <p class="text-sm text-gray-500 text-center mt-4">Complete more lessons to unlock new badges!</p>
         </section>
 
         <!-- General Settings Link -->
         <section>
-            <a href="#" class="flex items-center justify-between bg-white p-4 rounded-xl shadow-md hover:bg-gray-50 transition-colors">
-                <p class="font-semibold text-gray-700">Account and Notifications</p>
+            <a href="#" class="flex items-center justify-between bg-white p-4 rounded-xl shadow-md hover:bg-gray-50 transition-colors border border-gray-100">
+                <div class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings text-gray-500 mr-3"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.78 1.46a2 2 0 0 0 .73 2.73l.15.08a2 2 0 0 1 1 1.73v.53a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.78 1.46a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.78-1.46a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.73v-.53a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.78-1.46a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+                    <p class="font-semibold text-gray-700">Account and Notifications</p>
+                </div>
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right text-gray-400"><path d="m9 18 6-6-6-6"/></svg>
             </a>
         </section>
 
+
     </div>
+
+    <script>
+        // --- Static Mock Data (Simplified, consistent with dashboard) ---
+        const MOCK_DATA = {
+            recentBadges: [ 
+                { name: "First Save", emoji: "💵", color: "bg-green-500", description: "Completed 5 Finance lessons." },
+                { name: "Cyber Rookie", emoji: "🛡️", color: "bg-blue-500", description: "Learned about 2FA and cookies." },
+                { name: "5 Day Run", emoji: "🏃", color: "bg-yellow-500", description: "Achieved a 5-day learning streak." }
+            ],
+            // Data updated to show much higher progress
+            paths: [
+                { title: "Personal Finance", emoji: "💰", achieved: 80, total: 175, color: "bg-green-500" }, // ~45%
+                { title: "Digital Literacy", emoji: "💻", achieved: 55, total: 100, color: "bg-indigo-500" }, // 55%
+                { title: "Everyday Life Skills", emoji: "💡", achieved: 140, total: 200, color: "bg-pink-500" } // 70%
+            ],
+            streak: 14,
+            overallProgress: 35 // Percentage
+        };
+
+        /**
+         * Renders the profile summary metrics.
+         */
+        function renderSummaryMetrics() {
+            // Overall Progress
+            const progressPercent = MOCK_DATA.overallProgress;
+            document.getElementById('profile-overall-progress-percent').textContent = `${progressPercent}%`;
+            document.getElementById('profile-overall-progress-bar').style.width = `${progressPercent}%`;
+
+            // Streak
+            document.getElementById('profile-streak-value').textContent = MOCK_DATA.streak;
+        }
+
+        /**
+         * Renders the learning paths with progress bars, displaying Mastery Points.
+         */
+        function renderLearningPaths() {
+            const container = document.getElementById('profile-paths-container');
+            container.innerHTML = '';
+            
+            MOCK_DATA.paths.forEach(path => {
+                const achievedPoints = path.achieved;
+                const totalPoints = path.total;
+                
+                // Calculate percentage for the bar width
+                const percentage = Math.min(100, Math.round((achievedPoints / totalPoints) * 100));
+                
+                const pathHtml = `
+                    <div class="bg-white p-4 rounded-xl shadow-md flex items-center justify-between border border-gray-100 hover:bg-gray-50 transition-colors">
+                        <div class="flex items-center">
+                            <span class="text-2xl mr-3">${path.emoji}</span>
+                            <div>
+                                <p class="font-semibold text-gray-700">${path.title}</p>
+                                <p class="text-xs text-gray-500">${achievedPoints} Mastery Points Achieved</p>
+                            </div>
+                        </div>
+                        <div class="w-24 min-w-[6rem]">
+                            <!-- The bar visually represents the progress -->
+                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                <div class="h-2.5 rounded-full transition-all duration-300 ${path.color}" style="width: ${percentage}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', pathHtml);
+            });
+        }
+
+        /**
+         * Renders the achievements/badges.
+         */
+        function renderAchievements() {
+            const container = document.getElementById('profile-badges-container');
+            container.innerHTML = '';
+            
+            MOCK_DATA.recentBadges.forEach(badge => {
+                const badgeHtml = `
+                    <div class="p-4 rounded-xl shadow-lg flex flex-col items-center text-center w-36 border-2 border-teal-500/50 bg-white/70">
+                        <span class="text-4xl mb-2">${badge.emoji}</span>
+                        <p class="font-bold text-gray-800 text-sm">${badge.name}</p>
+                        <p class="text-xs text-gray-500 mt-1">${badge.description}</p>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', badgeHtml);
+            });
+        }
+
+        /**
+         * Initializes the page.
+         */
+        window.onload = function() {
+            renderSummaryMetrics();
+            renderLearningPaths();
+            renderAchievements();
+        };
+
+    </script>
 </body>
 </html>
