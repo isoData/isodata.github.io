@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Finance Skill Tree</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f9fb;
+        }
+        /* Custom styles for the accordion animation */
+        .module-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-in-out;
+        }
+        .module-content.expanded {
+            max-height: 500px; /* Arbitrary high value to allow expansion */
+        }
+        .lesson-node {
+            transition: background-color 0.15s;
+        }
+        /* --- STYLES FOR VISUAL CONNECTION (Vertical Timeline) --- */
+        .module-connector-line {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background-color: theme('colors.teal.300');
+            transform: translateX(-50%);
+        }
+        .module-header-anchor {
+            position: relative;
+            z-index: 10;
+        }
+        /* MODIFIED: Reduced z-index from 20 to 5 */
+        .module-dot {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background-color: theme('colors.white');
+            border: 3px solid theme('colors.teal.500');
+            z-index: 5; /* Reduced z-index */
+        }
+        /* NEW: Added z-index to the text container to ensure it sits on top (z-index of 10 in parent is not enough) */
+        .module-text-content {
+            z-index: 15; 
+            position: relative;
+        }
+        /* Connector pipe for lessons inside the dropdown */
+        .lesson-pipe {
+            border-left: 2px solid theme('colors.teal.400');
+            padding-left: 1.5rem;
+            margin-left: 0.5rem;
+        }
+        .lesson-icon-connector {
+            position: absolute;
+            left: -11px;
+            background-color: white;
+            padding: 2px;
+            border-radius: 50%;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <div id="app" class="max-w-xl mx-auto p-4 md:p-6">
+
+        <!-- Header and Back Button -->
+        <header class="flex items-center justify-start pt-2 pb-6">
+            <button onclick="window.history.back()" class="flex items-center text-teal-600 hover:text-teal-700 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" classuce lucide-chevron-left mr-1"><path d="m15 18-6-6 6-6"/></svg>
+                <span class="font-semibold text-lg">Back to Dashboard</span>
+            </button>
+        </header>
+
+        <!-- Skill Tree Title and Explanation -->
+        <div class="mb-6">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2 flex items-center">
+                <span class="text-4xl mr-3">💰</span> Personal Finance Skill Tree
+            </h1>
+            <p class="text-gray-500 mb-4">
+                Your roadmap to financial mastery. Tap on a module to see individual lessons.
+            </p>
+        </div>
+
+        <!-- Skill Tree Container (Rendered by JS) -->
+        <div id="skill-tree-container" class="space-y-6">
+            <!-- Skill Tiers will be rendered here -->
+        </div>
+
+    </div>
+
+    <script>
+        // --- Skill Tree Data Structure ---
+        const skillTreeData = [
+            {
+                tier: 1,
+                title: "Tier 1: Foundations",
+                status: "Completed",
+                statusColor: "bg-green-100 text-green-700 border-green-500",
+                isExpanded: true, 
+                isLocked: false,
+                modules: [
+                    { module: "Budget Basics", icon: "🧾", lessons: ["Track First Expense", "Needs vs Wants", "Create Simple Budget"] },
+                    { module: "Money Mindset", icon: "🧠", lessons: ["Impulse Spending Awareness", "Set Financial Goals", "Future Self Thinking"] },
+                    { module: "Bank Account Mastery", icon: "💳", lessons: ["Checking Accounts Basics", "Savings Accounts Basics", "Emergency Fund Intro"] },
+                ]
+            },
+            {
+                tier: 2,
+                title: "Tier 2: Control & Optimization",
+                status: "In Progress",
+                statusColor: "bg-teal-100 text-teal-700 border-teal-500",
+                isExpanded: false, // Start collapsed
+                isLocked: false,
+                modules: [
+                    { module: "Smart Budgeting", icon: "🎯", lessons: ["Zero-Based Budgeting", "50-30-20 Rule", "Automated Budgeting Tools"] },
+                    { module: "Debt Awareness", icon: "⚠️", lessons: ["Good vs Bad Debt", "Minimum Payment Pitfall", "Interest Explained"] },
+                    { module: "Saving Systems", icon: "🏦", lessons: ["Pay Yourself First", "High-Yield Savings", "Starter Emergency Fund"] },
+                ]
+            },
+            {
+                tier: 3,
+                title: "Tier 3: Growth & Strategy",
+                status: "Locked",
+                statusColor: "bg-gray-100 text-gray-500 border-gray-300",
+                isExpanded: false,
+                isLocked: true,
+                modules: [
+                    { module: "Strategic Debt Repayment", icon: "📉", lessons: ["Snowball vs Avalanche", "Refinancing Basics", "Debt Payoff Planning"] },
+                    { module: "Income Boosting", icon: "📈", lessons: ["Salary Negotiation", "Side Hustles", "Skill Monetization"] },
+                    { module: "Essential Investing", icon: "📊", lessons: ["Compound Interest", "Stocks vs Bonds vs Funds", "Risk Tolerance"] },
+                ]
+            },
+            {
+                tier: 4,
+                title: "Tier 4: Advanced Wealth Building",
+                status: "Locked",
+                statusColor: "bg-gray-100 text-gray-500 border-gray-300",
+                isExpanded: false,
+                isLocked: true,
+                modules: [
+                    { module: "Long-Term Investing", icon: "🌟", lessons: ["Index Funds vs ETFs", "Asset Allocation", "Diversification"] },
+                    { module: "Tax Efficiency", icon: "🛡️", lessons: ["Tax-Advantaged Accounts", "Capital Gains Basics", "Deductions & Credits"] },
+                    { module: "Big Purchases & Planning", icon: "🏠", lessons: ["Smart Car Buying", "Rent vs Buy", "Mortgage Basics"] },
+                ]
+            },
+            {
+                tier: 5,
+                title: "Tier 5: Mastery",
+                status: "Locked",
+                statusColor: "bg-gray-100 text-gray-500 border-gray-300",
+                isExpanded: false,
+                isLocked: true,
+                modules: [
+                    { module: "Financial Independence", icon: "🏖️", lessons: ["FIRE Basics", "Safe Withdrawal Rate", "Time-for-Money Freedom"] },
+                    { module: "Wealth Protection", icon: "🔒", lessons: ["Insurance Essentials", "Fraud Prevention", "Long-Term Stability"] },
+                    { module: "Legacy & Future Planning", icon: "🌳", lessons: ["Wills & Beneficiaries", "Estate Planning Basics", "Teaching Money Skills"] },
+                ]
+            }
+        ];
+
+        /**
+         * Toggles the visibility of a module's lessons (accordion function).
+         * @param {string} moduleId - The ID of the module content to toggle.
+         * @param {string} iconId - The ID of the chevron icon to rotate.
+         */
+        function toggleModule(moduleId, iconId) {
+            const content = document.getElementById(moduleId);
+            const icon = document.getElementById(iconId);
+
+            content.classList.toggle('expanded');
+            icon.classList.toggle('rotate-180');
+        }
+
+        /**
+         * Renders the complete skill tree structure.
+         */
+        function renderSkillTree() {
+            const container = document.getElementById('skill-tree-container');
+            container.innerHTML = '';
+
+            skillTreeData.forEach(tier => {
+                // Tier Header HTML
+                let tierHtml = `
+                    <div class="tier-box">
+                        <div class="tier-header relative border-b-4 ${tier.statusColor} pb-6">
+                            <h2 class="text-xl font-bold text-gray-800">${tier.title}</h2>
+                            <span class="absolute top-[-0.75rem] right-4 px-3 py-1 text-sm font-bold rounded-full shadow-md ${tier.statusColor.replace('border-', 'bg-').replace('text-', 'text-')}">${tier.status}</span>
+                        </div>
+                        
+                        <!-- Module Container: This is where the magic happens for connection -->
+                        <div class="relative px-4 pt-4 pb-1">
+                            <!-- Vertical Connector Line (behind modules) -->
+                            <div class="module-connector-line ${tier.isLocked ? 'bg-gray-300' : 'bg-teal-300'}"></div>
+                `;
+
+                // Modules and Lessons HTML
+                tier.modules.forEach((mod, modIndex) => {
+                    const moduleId = `tier-${tier.tier}-mod-${modIndex}`;
+                    const iconId = `tier-${tier.tier}-icon-${modIndex}`;
+                    const isExpandedClass = tier.isExpanded ? 'expanded' : ''; 
+                    
+                    const moduleStatus = tier.isLocked ? "Locked" : (tier.tier === 2 && modIndex === 0 ? "Next Up" : "Not Started");
+                    const moduleBg = tier.isLocked ? "bg-gray-50 cursor-default" : "bg-white hover:bg-teal-50 cursor-pointer";
+
+                    tierHtml += `
+                        <div class="mb-4 relative">
+                            <!-- Module Header: Floating Card with Anchor Dot -->
+                            <div onclick="${tier.isLocked ? '' : `toggleModule('${moduleId}', '${iconId}')`}"
+                                 class="p-4 rounded-xl shadow-md ${moduleBg} flex items-center justify-between font-semibold module-header-anchor">
+                                
+                                <!-- Connection Dot: ONLY RENDER IF TIER IS NOT LOCKED -->
+                                ${!tier.isLocked ? 
+                                    `<div class="module-dot bg-white border-teal-500"></div>` : 
+                                    // If locked, render an anchor dot that blends with the gray line
+                                    `<div class="module-dot bg-gray-500 border-gray-600 opacity-0"></div>` 
+                                }
+
+                                
+                                <div class="flex items-center space-x-3 w-full ml-4 module-text-content">
+                                    <span class="text-2xl">${mod.icon}</span>
+                                    <span class="text-lg text-gray-800">${mod.module}</span>
+                                </div>
+                                <div class="flex items-center space-x-3 flex-shrink-0 module-text-content">
+                                    <span class="text-xs ${tier.isLocked ? 'text-gray-500' : (moduleStatus === 'Next Up' ? 'text-red-500 font-bold' : 'text-gray-400')}">${moduleStatus}</span>
+                                    <svg id="${iconId}" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" classuce lucide-chevron-down text-gray-400 transition-transform ${tier.isExpanded ? 'rotate-180' : ''}"><path d="m6 9 6 6 6-6"/></svg>
+                                </div>
+                            </div>
+
+                            <!-- Lessons Content (Collapsible with Connector Pipe) -->
+                            <div id="${moduleId}" class="module-content ${isExpandedClass}">
+                                <div class="p-3 space-y-2 bg-white lesson-pipe">
+                                    ${mod.lessons.map((lesson, lessonIndex) => {
+                                        const isActive = (tier.tier === 2 && modIndex === 0 && lessonIndex === 0);
+                                        const isCompleted = (tier.tier === 1); 
+
+                                        let iconSvg;
+                                        if (isActive) {
+                                            iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" class="text-red-500"><circle cx="12" cy="12" r="10"/><path d="m12 16 4-4-4-4"/><path d="M8 12h8"/></svg>`;
+                                        } else if (isCompleted) {
+                                            iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" class="text-green-500"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>`;
+                                        } else {
+                                            iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="currentColor" class="text-gray-400"><circle cx="12" cy="12" r="12"/></svg>`;
+                                        }
+
+                                        const lessonStatusColor = isActive ? 'text-red-600 font-bold' : (isCompleted ? 'text-green-700' : 'text-gray-700');
+                                        const lessonBackground = isActive ? 'bg-red-50' : (isCompleted ? 'bg-green-50' : 'bg-white hover:bg-gray-50');
+
+                                        return `
+                                            <div class="lesson-node flex items-center p-3 rounded-lg border border-gray-100 ${lessonBackground} relative">
+                                                <div class="lesson-icon-connector w-5 h-5 flex items-center justify-center">
+                                                    ${iconSvg}
+                                                </div>
+                                                <p class="text-sm ${lessonStatusColor}">${lesson}</p>
+                                            </div>
+                                        `;
+                                    }).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                tierHtml += `
+                        </div>
+                    </div>
+                `;
+
+                container.insertAdjacentHTML('beforeend', tierHtml);
+            });
+        }
+
+        // Initialize the tree view
+        window.onload = renderSkillTree;
+    </sCRIPT>
+</body>
+</html>
