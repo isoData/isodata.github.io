@@ -18,7 +18,6 @@
             align-items: center;
             text-align: center;
             position: relative;
-            /* Base padding for the entire body content */
             padding-bottom: 50px; 
             filter: grayscale(10%) contrast(110%);
         }
@@ -29,7 +28,7 @@
             100% { opacity: 1; transform: translateY(0); }
         }
 
-        /* --- Full-Screen Background Container (from game.html) --- */
+        /* --- Full-Screen Background Container --- */
         .background-fixed {
             position: fixed;
             top: 0;
@@ -87,7 +86,6 @@
             margin: 0 auto;
             padding: 30px 20px;
             box-sizing: border-box;
-            /* FIX: Increased bottom padding greatly to ensure the last evidence box is visible above the dynamically appearing next stage box */
             padding-bottom: 280px; 
         }
         
@@ -169,8 +167,6 @@
             text-align: left;
             animation: slideDown 0.5s;
             box-sizing: border-box;
-            
-            /* Scrolling support for long content */
             max-height: 85vh; 
             overflow-y: auto; 
         }
@@ -203,20 +199,18 @@
             padding-bottom: 5px;
         }
 
-        /* --- Next Stage Button Container (FLOW FIX) --- */
+        /* --- Next Stage Button Container --- */
         .next-stage-container {
             height: auto; 
             display: flex;
             justify-content: center;
             align-items: center;
             width: 100%;
-            /* Push container down below the grid */
             margin-top: 50px; 
-            /* Added padding-bottom to the container itself for extra clearance */
             padding-bottom: 30px; 
         }
         
-        /* --- Next Stage Button (Appears inside the container) --- */
+        /* --- Next Stage Button --- */
         #nextStageBox {
             background-color: rgba(255, 172, 71, 0.2);
             padding: 30px;
@@ -239,7 +233,7 @@
             pointer-events: auto;
         }
         
-        .btn { /* General Button Styling */
+        .btn {
             display: inline-block; background-color: #333; color: #f0f0f0; padding: 18px 35px;
             border: 3px solid #FFAC47; 
             border-radius: 0; text-decoration: none;
@@ -250,24 +244,13 @@
         .btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0px #000; }
 
         /* --- Animations --- */
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        @keyframes slideDown {
-            from { transform: translateY(-50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideDown { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
         /* Responsive adjustments */
         @media (max-width: 600px) {
             h1 { font-size: 1.8em; }
-            .modal-content { 
-                width: 90%; 
-                margin: 10% auto; 
-                padding: 25px; 
-                box-sizing: border-box; 
-            }
+            .modal-content { width: 90%; margin: 10% auto; padding: 25px; box-sizing: border-box; }
             .location-box h3 { font-size: 1.2em; }
             .location-grid { grid-template-columns: 1fr; }
         }
@@ -307,15 +290,16 @@
     </div>
 
     <script>
-        // --- DATA STRUCTURE (UPDATED) ---
+        // --- DATA STRUCTURE (UPDATED TO 6 LOCATIONS) ---
         const locationsData = [
             {
                 id: 'penthouse',
                 title: "Crime Scene (Thorne's Penthouse) 🔎",
                 setting: "Thorne kept a clean house, but the best lies are tucked just out of sight. You run your hand over the dead man's opulent veneer, looking for the cracks.",
                 findings: [
-                    "Behind a mirror, you find a hidden drawer with a small, burned mark: a <i>stylized J 🔥</i>.",
-                    "In a Bible, you find a faded photograph of Thorne and a young woman. The note on the back says: ‘The money is safe. – E.’ 💰."
+                    "Front door lock is intact; no signs of <i>forced entry</i> 🚪.",
+                    "A <i>half-burnt matchbook</i> from 'The Velvet Shadow' found under the desk 🔥.",
+                    "Photo of Thorne and a young woman with a note: 'Thanks for the insurance. – C.' 📸"
                 ]
             },
             {
@@ -323,8 +307,8 @@
                 title: "Police Precinct (Homicide Desk) 🚨",
                 setting: "Murphy gives you 5 minutes with the file. The air smells of stale coffee and desperation.",
                 findings: [
-                    "Thorne had a huge, secret debt to private lender Ms. Evelyn Reed 📄.",
-                    "He was recently paranoid, reporting that someone stole <i>the silver necklace he had given Clara</i> (which had a distinctive clasp) and was using it to 'track' him. ⛓️"
+                    "Thorne had a huge <i>gambling debt</i> to private lender Evelyn Reed 📄.",
+                    "Police Report: Thorne recently called in a disturbance regarding a <i>'stalker'</i> watching his apartment 👀."
                 ]
             },
             {
@@ -332,8 +316,8 @@
                 title: "Newspaper Office (City Desk) 📰",
                 setting: "Smelly, chaotic city desk. Reporter Jackie Miller talks fast, eyes always on the next headline.",
                 findings: [
-                    "Thorne was seen arguing violently with rival bookie Sal 'The Quick' Ricci 😡 two nights ago over 'stolen funds.'",
-                    "The next morning, Ricci was suddenly wearing expensive new cufflinks ✨, paid for in cash."
+                    "Thorne publicly argued with rival Sal Ricci over stolen funds last week 😡.",
+                    "Sal Ricci appeared wealthy with <i>new gold cufflinks</i> the morning after the murder ✨."
                 ]
             },
             {
@@ -341,20 +325,39 @@
                 title: "Dingy Bar (The Velvet Shadow) 🥃",
                 setting: "The bartender Gus polishes the same glass, remembering every cheap secret traded across his counter.",
                 findings: [
-                    "Thorne was dating Clara, the coat-check girl. He gave her a <i>silver necklace and matching earrings</i> 🎁.",
-                    "Clara was terrified of her abusive ex-boyfriend, Mickey 🔪.",
-                    "Mickey once <i>violently demanded the jewelry</i> (the gift from Thorne) to be discarded. He was always quiet and kept his hands hidden, which Gus found unsettling."
+                    "Thorne gave Clara (coat-check girl) a <i>silver necklace and matching earrings</i> 🎁.",
+                    "Clara's ex, Mickey, is a <i>heavy smoker</i> who was seen aggressively demanding Clara's new jewelry 🚬."
+                ]
+            },
+            // NEW LOCATION 1
+            {
+                id: 'garage',
+                title: "Underground Parking Garage 🚗",
+                setting: "The fluorescent lights hum and flicker. Thorne’s car sits in the corner, a shrine to urban violence in the concrete quiet.",
+                findings: [
+                    "Thorne's windshield is smashed with a brick wrapped in a note: <i>'Tick Tock - V.'</i> (Points to Vito) 🧱.",
+                    "Parking attendant log: A <i>beat-up, rusted sedan</i> was seen idling across the street every night this week (Points to Mickey) 🚘."
+                ]
+            },
+            // NEW LOCATION 2
+            {
+                id: 'pawn_shop',
+                title: "Lucky's Pawn Shop ♟️",
+                setting: "A graveyard of lost hopes. Ticking clocks cover the walls, counting down seconds that don't matter anymore.",
+                findings: [
+                    "Ledger: Thorne <i>pawned his Rolex</i> three days ago (Suggests he had no money for Sal to steal) ⌚.",
+                    "Shopkeeper testimony: Sold a cheap, second-hand <i>.22 caliber pistol</i> yesterday to a 'twitchy guy in a greaser jacket' (Points to Mickey) 🔫."
                 ]
             }
         ];
 
         // State management object to track visited locations
         const visitedLocations = {};
-        let currentOpenModalId = null; // State to track the currently open modal
+        let currentOpenModalId = null; 
 
         // --- DOM ELEMENTS ---
         const modal = document.getElementById('evidenceModal');
-        const modalContent = document.getElementById('modalContent'); // Get content reference
+        const modalContent = document.getElementById('modalContent');
         const nextStageBox = document.getElementById('nextStageBox');
 
         // --- CORE FUNCTIONS ---
@@ -370,7 +373,6 @@
                 box.className = `location-box ${isVisited ? 'visited' : ''}`;
                 box.setAttribute('data-id', location.id);
                 
-                // Location box click logic remains the same (close current/open new)
                 box.onclick = () => {
                     const clickedId = location.id;
                     
@@ -416,7 +418,7 @@
             });
 
             modal.style.display = 'block';
-            currentOpenModalId = location.id; // Set the tracking state
+            currentOpenModalId = location.id; 
 
             // Mark as visited and check game progress
             markVisited(location.id);
@@ -425,7 +427,7 @@
         // 3. Closes the modal
         function closeModal() {
             modal.style.display = 'none';
-            currentOpenModalId = null; // Clear the tracking state
+            currentOpenModalId = null; 
         }
 
         // 4. Marks location as visited and updates UI/Game State
@@ -443,6 +445,7 @@
             const totalLocations = locationsData.length;
             const visitedCount = Object.keys(visitedLocations).length;
             
+            // Logic automatically scales to 6 locations
             if (visitedCount === totalLocations) {
                 setTimeout(() => {
                     nextStageBox.classList.add('visible');
@@ -451,22 +454,12 @@
         }
 
         // --- EVENT LISTENERS ---
-
-        // This listener closes the modal when clicking the dark background overlay.
-        // It ensures that event.target is the 'modal' element itself, not the content box.
+        // Close modal on clicking dark background (but not the content box)
         modal.addEventListener('click', function(event) {
             if (event.target === modal) {
                 closeModal();
             }
         });
-        
-        // NEW: Listener to close the modal when clicking the content box itself.
-        // NOTE: While this fulfills the request, this action will disable natural scrolling 
-        // on the content box on most touch devices (mobile) as a tap/scroll start 
-        // will be interpreted as a click and close the modal.
-        modalContent.addEventListener('click', closeModal);
-
-        // The close button uses the onclick="closeModal()" attribute directly in the HTML.
         
         // Initialize the stage
         window.onload = renderLocations;
