@@ -60,10 +60,10 @@ const locationsData = [
 ];
 
 const suspectsData = [
-  { name: "Vito 'The Hammer' Moretti", motive: "Silence a witness.", fact: "Pro hit, silenced gun fits the MO for a mob execution." },
-  { name: "Sal 'The Quick' Ricci", motive: "Stolen money revenge.", fact: "Fought with Thorne, suddenly appeared wealthy." },
-  { name: "Ms. Evelyn Reed", motive: "Huge debt collection.", fact: "Private lender with potential connections to enforce payment violently." },
-  { name: "Mickey", motive: "Jealousy/Control.", fact: "Quiet killer, obsessed with the necklace/Clara. The jewelry is the key." }
+  { name: "Vito 'The Hammer' Moretti", motive: "Silence a witness.",kq: "mob", fact: "Pro hit, silenced gun fits the MO for a mob execution." },
+  { name: "Sal 'The Quick' Ricci", motive: "Stolen money revenge.", kq: "money", fact: "Fought with Thorne, suddenly appeared wealthy." },
+  { name: "Ms. Evelyn Reed", motive: "Huge debt collection.", kq: "debt", fact: "Private lender with potential connections to enforce payment violently." },
+  { name: "Mickey", motive: "Jealousy/Control.", kq: "passion", fact: "Quiet killer, obsessed with the necklace/Clara. The jewelry is the key." }
 ];
 
 const CORRECT_KILLER = 'Mickey';
@@ -72,21 +72,27 @@ export default function App() {
   // --- STATE ---
   const [stage, setStage] = useState('intro'); // 'intro', 'briefing', 'investigation', 'suspects', 'reveal'
   const [visitedLocations, setVisitedLocations] = useState([]);
-  const [showNextStageBtn, setShowNextStageBtn] = useState(false);
+  // Stores IDs like 'penthouse-0', 'bar-1' to keep track of revealed clues globally
+  const [revealedClues, setRevealedClues] = useState([]); 
   
   // Modals
   const [evidenceModal, setEvidenceModal] = useState({ show: false, data: null });
   const [suspectModal, setSuspectModal] = useState({ show: false, title: '', message: '', correct: false });
 
   // Background Image Logic
+  const MZ_IMG_INTRO = 'https://i.imgur.com/G3cLxS8.gif';
+  const MZ_IMG_BRIEFING = 'https://i.imgur.com/iqioKnE.gif';
+  const MZ_IMG_INVESTIGATION = 'https://i.imgur.com/MHfLJSY.png';
+  const MZ_IMG_SUSPECTS = 'https://i.imgur.com/aMU7nyM.gif';
+  
   const getBg = () => {
     switch(stage) {
-      case 'intro': return 'https://i.imgur.com/G3cLxS8.gif';
-      case 'briefing': return 'https://i.imgur.com/iqioKnE.gif';
-      case 'investigation': return 'https://i.imgur.com/MHfLJSY.png';
-      case 'suspects': return 'https://i.imgur.com/aMU7nyM.gif';
-      case 'reveal': return 'https://i.imgur.com/iqioKnE.gif';
-      default: return 'https://i.imgur.com/G3cLxS8.gif';
+      case 'intro': return MZ_IMG_INTRO;
+      case 'briefing': return MZ_IMG_BRIEFING;
+      case 'investigation': return MZ_IMG_INVESTIGATION;
+      case 'suspects': return MZ_IMG_SUSPECTS;
+      case 'reveal': return MZ_IMG_BRIEFING;
+      default: return MZ_IMG_INTRO;
     }
   };
 
@@ -98,12 +104,17 @@ export default function App() {
 
   const openEvidence = (loc) => {
     setEvidenceModal({ show: true, data: loc });
+    // We do NOT reset revealedClues here anymore, so clues stay found!
     if (!visitedLocations.includes(loc.id)) {
       const newVisited = [...visitedLocations, loc.id];
       setVisitedLocations(newVisited);
-      if (newVisited.length === locationsData.length) {
-        setTimeout(() => setShowNextStageBtn(true), 500);
-      }
+    }
+  };
+
+  const handleRevealClue = (locId, index) => {
+    const clueId = `${locId}-${index}`;
+    if (!revealedClues.includes(clueId)) {
+      setRevealedClues([...revealedClues, clueId]);
     }
   };
 
@@ -127,27 +138,26 @@ export default function App() {
 
   const restartGame = () => {
     setVisitedLocations([]);
-    setShowNextStageBtn(false);
+    setRevealedClues([]); // Only reset clues on full game restart
     setSuspectModal({ show: false, title: '', message: '', correct: false });
     setEvidenceModal({ show: false, data: null });
     setStage('intro');
   };
 
   // --- RENDER HELPERS ---
-  // We use this to inject the styles directly into the component
   const styles = `
     @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=IBM+Plex+Mono:wght@300;400;700&display=swap');
     
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes flyUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes scaleIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+    @keyframes glow { 0% { box-shadow: 0 0 5px #FFAC47; } 50% { box-shadow: 0 0 20px #FFAC47; } 100% { box-shadow: 0 0 5px #FFAC47; } }
 
-    body, html { height: 100%; margin: 0; padding: 0; }
-    
     .app-container {
       font-family: 'IBM Plex Mono', monospace;
       color: #d0d0d0;
       min-height: 100vh;
+      width: 100%;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -157,23 +167,31 @@ export default function App() {
     }
 
     .background-fixed {
-      position: fixed;
+      position: absolute;
       top: 0; left: 0; width: 100%; height: 100%;
-      z-index: -2;
+      z-index: 0;
       background-size: cover;
       background-position: center;
       transition: background-image 1s ease-in-out;
     }
 
     .overlay {
-      position: fixed;
+      position: absolute;
       top: 0; left: 0; right: 0; bottom: 0;
       background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.85) 100%);
-      z-index: -1;
+      z-index: 1;
       pointer-events: none;
     }
 
-    /* TYPOGRAPHY */
+    .content-wrapper {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
     h1, h2, h3 {
       font-family: 'Cinzel Decorative', cursive;
       color: #f0f0f0;
@@ -193,7 +211,6 @@ export default function App() {
     
     .title-bar h1 { font-size: 2.2em; text-transform: uppercase; }
 
-    /* BUTTONS */
     .btn {
       background-color: #333;
       color: #f0f0f0;
@@ -215,7 +232,6 @@ export default function App() {
       box-shadow: 6px 6px 0px #000;
     }
 
-    /* CARDS */
     .container {
       max-width: 1000px;
       width: 90%;
@@ -248,10 +264,10 @@ export default function App() {
     .card h3 { margin-top: 0; color: #f0f0f0; border-bottom: 1px dashed #555; padding-bottom: 10px; font-size: 1.4em; }
     .card p { margin-bottom: 0; line-height: 1.5; }
 
-    /* SECTIONS */
     .center-stage {
       display: flex; flex-direction: column; justify-content: center; align-items: center;
-      height: 100vh; text-align: center;
+      min-height: 100vh; text-align: center;
+      width: 100%;
     }
     .main-title { font-size: 3.5em; margin-bottom: 20px; animation: flyUp 1.5s ease-out; }
     .subtitle { max-width: 600px; font-size: 1.1em; margin-bottom: 40px; font-weight: bold; animation: flyUp 1.5s ease-out 0.5s backwards; }
@@ -280,7 +296,7 @@ export default function App() {
     .evidence-list { text-align: left; list-style: none; padding: 0; }
     .evidence-list li { margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px; }
     
-    /* MODALS */
+    /* MODALS & CLUE BOXES */
     .modal-backdrop {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(0,0,0,0.95); z-index: 100;
@@ -294,6 +310,47 @@ export default function App() {
       animation: scaleIn 0.3s ease-out;
     }
     .close-btn { float: right; font-size: 28px; cursor: pointer; color: #FFAC47; }
+    
+    .clue-list { list-style: none; padding: 0; margin-top: 20px; }
+    .clue-item {
+      background: rgba(0, 0, 0, 0.6);
+      margin-bottom: 15px;
+      border: 1px solid #444;
+      padding: 15px;
+      transition: all 0.3s;
+      min-height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .clue-item.hidden {
+      cursor: pointer;
+      background: repeating-linear-gradient(
+        45deg,
+        #3d3d3d,
+        #3d3d3d 10px,
+        #4a4a4a 10px,
+        #4a4a4a 20px
+      );
+      border: 2px dashed #FFAC47;
+      color: #fff;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      animation: glow 3s infinite;
+    }
+    .clue-item.hidden:hover {
+      background: #FFAC47;
+      color: #000;
+      border-style: solid;
+    }
+    .clue-item.revealed {
+      background: rgba(0,0,0,0.8);
+      border-left: 4px solid #4CAF50;
+      justify-content: flex-start;
+      text-align: left;
+      animation: fadeIn 0.5s;
+    }
     
     .feedback-content { background: #3A1A1A; border-color: #FF3333; text-align: center; }
     .feedback-content h2 { color: #FF3333; }
@@ -313,128 +370,144 @@ export default function App() {
       <div className="background-fixed" style={{ backgroundImage: `url('${getBg()}')` }}></div>
       <div className="overlay"></div>
 
-      {/* --- INTRO STAGE --- */}
-      {stage === 'intro' && (
-        <div className="center-stage">
-          <h1 className="main-title">Case:Zero</h1>
-          <p className="subtitle">
-            In the city's shadowed alleys, every whisper hides a lie, every silhouette a secret. Today's case awaits, detective.
-          </p>
-          <button className="btn" style={{animation: 'fadeIn 1s ease-out 2s backwards'}} onClick={() => handleSetStage('briefing')}>
-            Begin Investigation
-          </button>
-        </div>
-      )}
-
-      {/* --- BRIEFING STAGE --- */}
-      {stage === 'briefing' && (
-        <div className="center-stage" style={{ height: 'auto', paddingTop: '50px' }}>
-          <div className="title-bar">
-            <h1>The Case of the Silver Serpent 🕵️</h1>
+      <div className="content-wrapper">
+        {/* --- INTRO STAGE --- */}
+        {stage === 'intro' && (
+          <div className="center-stage">
+            <h1 className="main-title">Case:Zero</h1>
+            <p className="subtitle">
+              In the city's shadowed alleys, every whisper hides a lie, every silhouette a secret. Today's case awaits, detective.
+            </p>
+            <button className="btn" style={{animation: 'fadeIn 1s ease-out 2s backwards'}} onClick={() => handleSetStage('briefing')}>
+              Begin Investigation
+            </button>
           </div>
-          <div className="case-file">
-            <h2>Case Briefing: Elias Thorne</h2>
-            <p>The <i>Rain 🌧️ </i>is a cruel curtain over the city. Detective Murphy from Homicide is sitting opposite you.</p>
-            <p>"The victim is <i>Elias 'The Serpent' 🐍 Thorne</i>. Mob bookie. Found him in his penthouse. One shot, clean and quiet. Looks professional, but his safe is untouched. The only thing we found? He was clutching a sliver of broken metal: a <i>silver earring 👂</i>."</p>
+        )}
 
-            <h3>Initial Clues</h3>
-            <ul>
-                <li><strong>Victim:</strong> Elias 'The Serpent' Thorne 🐍</li>
-                <li><strong>Cause of Death:</strong> Single, silenced shot 🔫</li>
-                <li><strong>Initial Clue:</strong> A broken silver earring 👂</li>
-                <li><strong>Complication:</strong> Thorne was set to betray Vito 'The Hammer' Moretti 🔨</li>
-            </ul>
-          </div>
-          <button className="btn" style={{ marginBottom: '50px' }} onClick={() => handleSetStage('investigation')}>Start Investigation</button>
-        </div>
-      )}
-
-      {/* --- INVESTIGATION STAGE --- */}
-      {stage === 'investigation' && (
-        <div className="container">
-          <div className="title-bar">
-            <h1>Stage 2: Evidence Collection 🔎</h1>
-          </div>
-          <p className="instruction">The city is a puzzle box. Visit these locations to find the clues.</p>
-
-          <div className="grid">
-            {locationsData.map((loc, i) => (
-              <div 
-                key={loc.id}
-                className={`card ${visitedLocations.includes(loc.id) ? 'visited' : ''}`}
-                style={{ animationDelay: `${i * 0.1}s` }}
-                onClick={() => openEvidence(loc)}
-              >
-                <h3>{loc.title}</h3>
-                <p>{loc.setting.substring(0, 60)}...</p>
-              </div>
-            ))}
-          </div>
-
-          {showNextStageBtn && (
-            <div style={{ marginTop: '40px', animation: 'flyUp 0.5s ease-out' }}>
-              <p>You have collected all the evidence. Time to make your call.</p>
-              <button className="btn" onClick={() => handleSetStage('suspects')}>Proceed to Suspects 🤔</button>
+        {/* --- BRIEFING STAGE --- */}
+        {stage === 'briefing' && (
+          <div className="center-stage" style={{ height: 'auto', paddingTop: '50px' }}>
+            <div className="title-bar">
+              <h1>The Case of the Silver Serpent 🕵️</h1>
             </div>
-          )}
-        </div>
-      )}
+            <div className="case-file">
+              <h2>Case Briefing: Elias Thorne</h2>
+              <p>The <i>Rain 🌧️ </i>is a cruel curtain over the city. Detective Murphy from Homicide is sitting opposite you.</p>
+              <p>"The victim is <i>Elias 'The Serpent' 🐍 Thorne</i>. Mob bookie. Found him in his penthouse. One shot, clean and quiet. Looks professional, but his safe is untouched. The only thing we found? He was clutching a sliver of broken metal: a <i>silver earring 👂</i>."</p>
 
-      {/* --- SUSPECTS STAGE --- */}
-      {stage === 'suspects' && (
-        <div className="container">
-          <div className="title-bar">
-            <h1>Stage 3: The Suspects 👥</h1>
+              <h3>Initial Clues</h3>
+              <ul>
+                  <li><strong>Victim:</strong> Elias 'The Serpent' Thorne 🐍</li>
+                  <li><strong>Cause of Death:</strong> Single, silenced shot 🔫</li>
+                  <li><strong>Initial Clue:</strong> A broken silver earring 👂</li>
+                  <li><strong>Complication:</strong> Thorne was set to betray Vito 'The Hammer' Moretti 🔨</li>
+              </ul>
+            </div>
+            <button className="btn" style={{ marginBottom: '50px' }} onClick={() => handleSetStage('investigation')}>Start Investigation</button>
           </div>
-          <p className="instruction">Time to choose the killer based on Motive, Means, and Opportunity.</p>
+        )}
 
-          <div className="grid">
-            {suspectsData.map((suspect, i) => (
-              <div 
-                key={i}
-                className="card suspect-card"
-                style={{ animationDelay: `${i * 0.2}s` }}
-                onClick={() => selectSuspect(suspect.name)}
-              >
-                <h3>{suspect.name}</h3>
-                <p><strong>Motive:</strong> {suspect.motive}</p>
-                <p className="fact">Fact: {suspect.fact}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* --- REVEAL STAGE --- */}
-      {stage === 'reveal' && (
-        <div className="center-stage" style={{ height: 'auto', paddingTop: '50px' }}>
-          <div className="title-bar">
-            <h1>The Conclusion</h1>
-          </div>
-          <div className="reveal-box">
-            <div style={{ fontStyle: 'italic', marginBottom: '20px', textAlign: 'center' }}>"Success. The truth always surfaces eventually."</div>
-            <div className="killer-name">THE KILLER IS: MICKEY</div>
+        {/* --- INVESTIGATION STAGE --- */}
+        {stage === 'investigation' && (
+          <div className="container" style={{ marginTop: '50px' }}>
+            <div className="title-bar">
+              <h1>Stage 2: Evidence Collection 🔎</h1>
+            </div>
             
-            <h3>Motive: Passion and Greed</h3>
-            <p style={{ textAlign: 'center', marginBottom: '20px' }}>(Wanted the jewelry/hated Thorne)</p>
-            
-            <ul className="evidence-list">
-              <li><strong>Matchbook:</strong> Places Mickey (smoker) at the scene.</li>
-              <li><strong>Earring:</strong> Matches the set Thorne gave Clara.</li>
-              <li><strong>No forced entry:</strong> Mickey stole Clara's key.</li>
-              <li><strong>Stalker Report:</strong> Confirms Mickey's obsession.</li>
-            </ul>
-
-            <div style={{ marginTop: '40px', fontSize: '1.2em', textAlign: 'center', color: '#ddd' }}>
-              <i>The city sleeps a little sounder tonight, Detective.</i> 🕵️‍♂️
+            {/* Added Counter and Button Container */}
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '20px', marginBottom: '20px', flexWrap: 'wrap' }}>
+              <div style={{ fontSize: '1.2em', color: '#FFAC47', fontWeight: 'bold' }}>
+                LOCATIONS VISITED: {visitedLocations.length} 📍
+              </div>
+              <div style={{ fontSize: '1.2em', color: '#FFAC47', fontWeight: 'bold' }}>
+                CLUES EXAMINED: {revealedClues.length} 🔍
+              </div>
+              <button className="btn" style={{ marginTop: 0, padding: '12px 20px', fontSize: '1em' }} onClick={() => handleSetStage('suspects')}>
+                Proceed to Suspects 🤔
+              </button>
             </div>
 
-            <div style={{ textAlign: 'center', marginTop: '30px' }}>
-              <button className="btn" onClick={restartGame}>Start New Case</button>
+            <p className="instruction">The city is a puzzle box. Visit these locations to find the clues.</p>
+            
+            <div className="grid">
+              {locationsData.map((loc, i) => (
+                <div 
+                  key={loc.id}
+                  className={`card ${visitedLocations.includes(loc.id) ? 'visited' : ''}`}
+                  style={{ animationDelay: `${i * 0.1}s` }}
+                  onClick={() => openEvidence(loc)}
+                >
+                  <h3>{loc.title}</h3>
+                  <p>{loc.setting.substring(0, 60)}...</p>
+                </div>
+              ))}
             </div>
           </div>
-        </div>
-      )}
+        )}
+
+        {/* --- SUSPECTS STAGE --- */}
+        {stage === 'suspects' && (
+          <div className="container" style={{ marginTop: '50px' }}>
+            <div className="title-bar">
+              <h1>Stage 3: The Suspects 👥</h1>
+            </div>
+            <p className="instruction">Time to choose the killer based on Motive, Means, and Opportunity.</p>
+
+            {/* Back Button */}
+            <div style={{ textAlign: 'center', marginBottom: '30px' }}>
+              <button className="btn" style={{ padding: '12px 25px', fontSize: '1em' }} onClick={() => handleSetStage('investigation')}>
+                ← Back to Investigation
+              </button>
+            </div>
+
+            <div className="grid">
+              {suspectsData.map((suspect, i) => (
+                <div 
+                  key={i}
+                  className="card suspect-card"
+                  style={{ animationDelay: `${i * 0.2}s` }}
+                  onClick={() => selectSuspect(suspect.name)}
+                >
+                  <h3>{suspect.name}</h3>
+                  <p><strong>Motive:</strong> {suspect.motive}</p>
+                  <p className="fact">Fact: {suspect.fact}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* --- REVEAL STAGE --- */}
+        {stage === 'reveal' && (
+          <div className="center-stage" style={{ height: 'auto', paddingTop: '50px' }}>
+            <div className="title-bar">
+              <h1>The Conclusion</h1>
+            </div>
+            <div className="reveal-box">
+              <div style={{ fontStyle: 'italic', marginBottom: '20px', textAlign: 'center' }}>"Success. The truth always surfaces eventually."</div>
+              <div className="killer-name">THE KILLER IS: MICKEY</div>
+              
+              <h3>Motive: Passion and Greed</h3>
+              <p style={{ textAlign: 'center', marginBottom: '20px' }}>(Wanted the jewelry/hated Thorne)</p>
+              
+              <ul className="evidence-list">
+                <li><strong>Matchbook:</strong> Places Mickey (smoker) at the scene.</li>
+                <li><strong>Earring:</strong> Matches the set Thorne gave Clara.</li>
+                <li><strong>No forced entry:</strong> Mickey stole Clara's key.</li>
+                <li><strong>Stalker Report:</strong> Confirms Mickey's obsession.</li>
+              </ul>
+
+              <div style={{ marginTop: '40px', fontSize: '1.2em', textAlign: 'center', color: '#ddd' }}>
+                <i>The city sleeps a little sounder tonight, Detective.</i> 🕵️‍♂️
+              </div>
+
+              <div style={{ textAlign: 'center', marginTop: '30px' }}>
+                <button className="btn" onClick={restartGame}>Start New Case</button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* --- EVIDENCE MODAL --- */}
       {evidenceModal.show && (
@@ -444,10 +517,24 @@ export default function App() {
             <h2 style={{ color: '#FFAC47' }}>{evidenceModal.data.title}</h2>
             <p>{evidenceModal.data.setting}</p>
             <h3 style={{ marginTop: '20px', color: '#FFAC47' }}>Findings</h3>
-            <ul>
-              {evidenceModal.data.findings.map((finding, idx) => (
-                <li key={idx} dangerouslySetInnerHTML={{ __html: finding }} />
-              ))}
+            <ul className="clue-list">
+              {evidenceModal.data.findings.map((finding, idx) => {
+                const clueId = `${evidenceModal.data.id}-${idx}`;
+                const isRevealed = revealedClues.includes(clueId);
+                return (
+                  <li 
+                    key={idx} 
+                    onClick={() => handleRevealClue(evidenceModal.data.id, idx)}
+                    className={`clue-item ${isRevealed ? 'revealed' : 'hidden'}`}
+                  >
+                    {isRevealed ? (
+                      <span dangerouslySetInnerHTML={{ __html: finding }} />
+                    ) : (
+                      <span>📦 Click to Reveal Evidence</span>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
           </div>
         </div>
