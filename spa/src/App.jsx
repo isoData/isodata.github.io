@@ -73,9 +73,12 @@ export default function App() {
   // --- STATE ---
   const [stage, setStage] = useState('intro'); // 'intro', 'briefing', 'investigation', 'suspects', 'reveal'
   const [visitedLocations, setVisitedLocations] = useState([]);
-  // Stores IDs like 'penthouse-0', 'bar-1' to keep track of revealed clues globally
   const [revealedClues, setRevealedClues] = useState([]); 
   
+  // Scoring State
+  const [score, setScore] = useState(1500);
+  const [lastScoreChange, setLastScoreChange] = useState(null); // { type: 'win'|'loss', amount, bonus, cluesUsed }
+
   // Modals
   const [evidenceModal, setEvidenceModal] = useState({ show: false, data: null });
   const [suspectModal, setSuspectModal] = useState({ show: false, title: '', message: '', correct: false });
@@ -105,7 +108,6 @@ export default function App() {
 
   const openEvidence = (loc) => {
     setEvidenceModal({ show: true, data: loc });
-    // We do NOT reset revealedClues here anymore, so clues stay found!
     if (!visitedLocations.includes(loc.id)) {
       const newVisited = [...visitedLocations, loc.id];
       setVisitedLocations(newVisited);
@@ -121,13 +123,39 @@ export default function App() {
 
   const selectSuspect = (suspectName) => {
     if (suspectName === CORRECT_KILLER) {
+      // Victory Calculation
+      const baseReward = 50;
+      const cluesUsed = revealedClues.length;
+      const penaltyPerClue = 5;
+      // Start with 30 bonus, subtract 5 per clue, min 0
+      const efficiencyBonus = Math.max(0, 30 - (cluesUsed * penaltyPerClue));
+      const totalPoints = baseReward + efficiencyBonus;
+
+      setScore(prev => prev + totalPoints);
+      setLastScoreChange({ 
+        type: 'win', 
+        amount: totalPoints, 
+        base: baseReward, 
+        bonus: efficiencyBonus, 
+        cluesUsed 
+      });
+
       setSuspectModal({
         show: true,
         title: "CASE CRACKED!",
-        message: `You correctly identified ${suspectName} as the killer. Your meticulous work has paid off, Detective. Time for the final reveal.`,
+        message: `You correctly identified ${suspectName} as the killer. Your meticulous work has paid off, Detective.`,
         correct: true
       });
     } else {
+      // Defeat Calculation
+      const penalty = 25;
+      
+      setScore(prev => prev - penalty);
+      setLastScoreChange({ 
+        type: 'loss', 
+        amount: penalty 
+      });
+
       setSuspectModal({
         show: true,
         title: "WRONG CALL, DETECTIVE.",
@@ -142,6 +170,7 @@ export default function App() {
     setRevealedClues([]); // Only reset clues on full game restart
     setSuspectModal({ show: false, title: '', message: '', correct: false });
     setEvidenceModal({ show: false, data: null });
+    setLastScoreChange(null);
     setStage('intro');
   };
 
@@ -298,6 +327,21 @@ export default function App() {
     .evidence-list { text-align: left; list-style: none; padding: 0; }
     .evidence-list li { margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px; }
     
+    .score-badge {
+      background: rgba(255, 172, 71, 0.2);
+      border: 1px solid #FFAC47;
+      color: #FFAC47;
+      padding: 15px;
+      margin: 20px 0;
+      text-align: center;
+      border-radius: 4px;
+    }
+    .score-detail {
+      font-size: 0.9em;
+      color: #aaa;
+      margin-top: 5px;
+    }
+    
     /* MODALS & CLUE BOXES */
     .modal-backdrop {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -380,6 +424,9 @@ export default function App() {
             <p className="subtitle">
               In the city's shadowed alleys, every whisper hides a lie, every silhouette a secret. Today's case awaits, detective.
             </p>
+            <div style={{color: '#FFAC47', marginBottom: '20px', fontFamily: 'IBM Plex Mono', fontSize: '1.1em'}}>
+              Current Rating: {score} (Lead Investigator)
+            </div>
             <button className="btn" style={{animation: 'fadeIn 1s ease-out 2s backwards'}} onClick={() => handleSetStage('briefing')}>
               Begin Investigation
             </button>
@@ -498,6 +545,27 @@ export default function App() {
             </div>
             <div className="reveal-box">
               <div style={{ fontStyle: 'italic', marginBottom: '20px', textAlign: 'center' }}>"Success. The truth always surfaces eventually."</div>
+              
+              {/* Investigation Stats Moved Here */}
+              <div style={{ margin: '20px 0', fontSize: '1.5em', display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '10px' }}>
+                 <span title="Locations Visited">{Array(visitedLocations.length).fill('📍').join('')}</span>
+                 <span title="Clues Found">{Array(revealedClues.length).fill('🔎').join('')}</span>
+              </div>
+
+              {/* MISSION REPORT (Rank & Score) */}
+              <div className="score-badge">
+                <div style={{fontSize: '1.3em', fontWeight: 'bold'}}>🛡️ Rank: Lead Investigator</div>
+                <div style={{fontSize: '1.5em', margin: '10px 0'}}>Current Rating: {score}</div>
+                {lastScoreChange && lastScoreChange.type === 'win' && (
+                  <div className="score-detail">
+                    <div>Base Reward: +{lastScoreChange.base}</div>
+                    <div>Efficiency Bonus: +{lastScoreChange.bonus} ({lastScoreChange.cluesUsed} clues used)</div>
+                    <div style={{color: '#4CAF50', fontWeight: 'bold'}}>Total Earned: +{lastScoreChange.amount}</div>
+                    <div style={{marginTop: '10px', fontSize: '0.8em'}}>Next Rank: Sherlock (at 3000)</div>
+                  </div>
+                )}
+              </div>
+
               <div className="killer-name">THE KILLER IS: MICKEY</div>
               
               <h3>Motive: Passion and Greed</h3>
@@ -560,12 +628,12 @@ export default function App() {
             <h2>{suspectModal.title}</h2>
             <p>{suspectModal.message}</p>
             
-            {/* Added Visualization */}
-            {suspectModal.correct && (
-               <div style={{ margin: '20px 0', fontSize: '1.5em', display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '10px' }}>
-                 <span>{Array(visitedLocations.length).fill('📍').join('')}</span>
-                 <span>{Array(revealedClues.length).fill('🔎').join('')}</span>
-               </div>
+            {/* Penalty Feedback */}
+            {!suspectModal.correct && (
+              <div style={{margin: '15px 0', color: '#FF3333'}}>
+                <div style={{fontWeight: 'bold', fontSize: '1.2em'}}>RATING PENALTY: -25</div>
+                <div>Current Rating: {score}</div>
+              </div>
             )}
 
             {suspectModal.correct ? (
