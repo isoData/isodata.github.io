@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createRoot } from 'react-dom/client';
 
 // --- DATA CONSTANTS ---
 const locationsData = [
@@ -164,6 +165,7 @@ export default function App() {
       position: relative;
       overflow-x: hidden;
       filter: grayscale(10%) contrast(110%);
+      background: #000;
     }
 
     .background-fixed {
@@ -451,6 +453,17 @@ export default function App() {
             <div className="title-bar">
               <h1>Stage 3: The Suspects 👥</h1>
             </div>
+
+            {/* Counters added here */}
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '20px', marginBottom: '20px', flexWrap: 'wrap' }}>
+              <div style={{ fontSize: '1.2em', color: '#FFAC47', fontWeight: 'bold' }}>
+                LOCATIONS VISITED: {visitedLocations.length} 📍
+              </div>
+              <div style={{ fontSize: '1.2em', color: '#FFAC47', fontWeight: 'bold' }}>
+                CLUES EXAMINED: {revealedClues.length} 🔍
+              </div>
+            </div>
+
             <p className="instruction">Time to choose the killer based on Motive, Means, and Opportunity.</p>
 
             {/* Back Button */}
@@ -546,6 +559,15 @@ export default function App() {
           <div className={`modal-content feedback-content ${suspectModal.correct ? 'correct' : ''}`} onClick={(e) => e.stopPropagation()}>
             <h2>{suspectModal.title}</h2>
             <p>{suspectModal.message}</p>
+            
+            {/* Added Visualization */}
+            {suspectModal.correct && (
+               <div style={{ margin: '20px 0', fontSize: '1.5em', display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '10px' }}>
+                 <span>{Array(visitedLocations.length).fill('📍').join('')}</span>
+                 <span>{Array(revealedClues.length).fill('🔎').join('')}</span>
+               </div>
+            )}
+
             {suspectModal.correct ? (
               <button className="btn" onClick={() => { setSuspectModal({ ...suspectModal, show: false }); handleSetStage('reveal'); }}>View Conclusion</button>
             ) : (
