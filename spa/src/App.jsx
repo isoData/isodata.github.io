@@ -1,77 +1,149 @@
 import React, { useState, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 
-// --- DATA CONSTANTS ---
-const locationsData = [
-  {
-    id: 'penthouse',
-    title: "Crime Scene (Thorne's Penthouse) 🔎",
-    setting: "Thorne kept a clean house, but the best lies are tucked just out of sight. You run your hand over the dead man's opulent veneer, looking for the cracks.",
-    findings: [
-      "Front door lock is intact; no signs of <i>forced entry</i> 🚪.",
-      "A <i>half-burnt matchbook</i> from 'The Velvet Shadow' found under the desk 🔥.",
-      "Photo of Thorne and a young woman with a note: 'Thanks for the insurance. – C.' 📸"
-    ]
-  },
-  {
-    id: 'precinct',
-    title: "Police Precinct (Homicide Desk) 🚨",
-    setting: "Murphy gives you 5 minutes with the file. The air smells of stale coffee and desperation.",
-    findings: [
-      "Thorne had a huge <i>gambling debt</i> to private lender Evelyn Reed 📄.",
-      "Police Report: Thorne recently called in a disturbance regarding a <i>'stalker'</i> watching his apartment 👀."
-    ]
-  },
-  {
-    id: 'newspaper',
-    title: "Newspaper Office (City Desk) 📰",
-    setting: "Smelly, chaotic city desk. Reporter Jackie Miller talks fast, eyes always on the next headline.",
-    findings: [
-      "Thorne publicly argued with rival Sal Ricci over stolen funds last week 😡.",
-      "Sal Ricci appeared wealthy with <i>new gold cufflinks</i> the morning after the murder ✨."
-    ]
-  },
-  {
-    id: 'bar',
-    title: "Dingy Bar (The Velvet Shadow) 🥃",
-    setting: "The bartender Gus polishes the same glass, remembering every cheap secret traded across his counter.",
-    findings: [
-      "Thorne gave Clara (coat-check girl) a <i>silver necklace and matching earrings</i> 🎁.",
-      "Clara's ex, Mickey, is a <i>heavy smoker</i> who was seen aggressively demanding Clara's new jewelry 🚬."
-    ]
-  },
-  {
-    id: 'garage',
-    title: "Underground Parking Garage 🚗",
-    setting: "The fluorescent lights hum and flicker. Thorne’s car sits in the corner, a shrine to urban violence in the concrete quiet.",
-    findings: [
-      "Thorne's windshield is smashed with a brick wrapped in a note: <i>'Tick Tock - V.'</i> 🧱.",
-      "Parking attendant log: A <i>beat-up, rusted sedan</i> was seen idling across the street every night this week 🚘."
-    ]
-  },
-  {
-    id: 'pawn_shop',
-    title: "Lucky's Pawn Shop ♟️",
-    setting: "A graveyard of lost hopes. Ticking clocks cover the walls, counting down seconds that don't matter anymore.",
-    findings: [
-      "Ledger: Thorne <i>pawned his Rolex</i> three days ago ⌚.",
-      "Shopkeeper testimony: Sold a cheap, second-hand <i>.22 caliber pistol</i> yesterday to a 'twitchy guy in a greaser jacket' 🔫."
+// --- FALLBACK DATA ---
+// Used if the API is unreachable or fails (e.g. CORS issues, offline)
+const FALLBACK_GAME_DATA = {
+  "gameData": {
+    "game_title": "The Velvet Shadow",
+    "theme": "Film Noir - A smoky tale of betrayal in the city's underbelly",
+    "stages": [
+      {
+        "stage_order": 1,
+        "stage_id": "briefing",
+        "display_data": {
+          "header": "Case Briefing: Vincent 'Vinnie' Malone",
+          "atmosphere_intro": "Rain hammers the cracked pavement like a thousand desperate fingers. The neon sign of The Velvet Room flickers its dying breath into the fog-choked street. 🌧️ Inside, cigarette smoke curls around the body like a ghost refusing to leave. ☁️",
+          "partner_dialogue": "Detective Murphy leans against the bar, his fedora dripping. 'Vinnie Malone. Club owner, loan shark, and by all accounts, a real charmer with the ladies and a real bastard with everyone else. Found him an hour ago, face-down in his own office. Single gunshot to the chest. 🔫 Here's the kicker—the office was locked from the inside, and the only key was in his pocket. The window's painted shut. Whoever did this, they were either a ghost... or someone Vinnie trusted enough to let them walk right out the front door with a smile.'",
+          "quick_facts": {
+            "victim": "Vincent 'Vinnie' Malone - Nightclub Owner & Loan Shark 🎰",
+            "cause_of_death": "Single gunshot wound to the chest 💀",
+            "initial_clue": "A woman's silk glove (left hand) clutched in victim's hand 🧤",
+            "complication": "Locked room mystery - door locked from inside, only key in victim's pocket 🔐"
+          }
+        }
+      },
+      {
+        "stage_order": 2,
+        "stage_id": "evidence_collection",
+        "description": "The player visits four specific locations to gather findings.",
+        "locations": [
+          {
+            "id": "crime_scene_office",
+            "name": "Vinnie's Private Office",
+            "description": "A cramped room reeking of bourbon and betrayal. The desk is mahogany, the carpet Persian, both now stained with blood.",
+            "findings": [
+              "An empty glass with lipstick stain (deep crimson shade) on the rim, sitting on the desk",
+              "A ledger showing Vinnie loaned $5,000 to 'J.H.' three months ago, marked 'OVERDUE - FINAL WARNING'",
+              "A half-written letter beginning 'My dearest C—, Tonight I'll tell her everything. We can finally be together...'",
+              "Faint scent of expensive perfume (Chanel No. 5) lingering in the air despite the cigarette smoke"
+            ]
+          },
+          {
+            "id": "backstage_dressing",
+            "name": "Performers' Dressing Room",
+            "description": "A narrow room lined with mirrors and costumes. The air is thick with hairspray and whispered secrets.",
+            "findings": [
+              "A matching right-hand silk glove in Stella Fontaine's locker, part of her stage costume",
+              "Photograph tucked in Cora's mirror frame: Vinnie and Cora embracing on a beach, dated six months ago",
+              "Stella's diary entry from yesterday: 'He promised me the lead. Now he's giving MY number to that tramp Cora. I won't be humiliated again.'",
+              "A small pistol (unloaded) hidden in Dolores Kane's makeup case, registered in her name",
+              "Stella's signature white fur coat hanging prominently on a hook with her name embroidered in gold thread"
+            ]
+          },
+          {
+            "id": "bar_main_floor",
+            "name": "The Velvet Room Bar",
+            "description": "Chrome and leather, with a long mirror behind rows of bottles that have seen better days.",
+            "findings": [
+              "Bartender Tommy recalls: 'Cora went upstairs around 10:15 PM. Came down at 10:40, looked shaken, left immediately through the back.'",
+              "Tommy also mentions: 'Jack Halloway was here earlier, arguing with Vinnie about money. Vinnie laughed in his face, said he'd take Jack's car next.'",
+              "Cigarette butts in ashtray - three different lipstick shades: crimson, pink, and nude",
+              "A napkin with a note in masculine handwriting: 'Midnight. Come alone. We finish this.' - found crumpled near the phone booth",
+              "Tommy adds: 'Stella? Yeah, she was here too. Saw her heading upstairs around 10:25, right after Cora came down. She had that look—you know, the one dames get when they're about to do something they can't take back.'"
+            ]
+          },
+          {
+            "id": "back_alley",
+            "name": "Back Alley Behind The Velvet Room",
+            "description": "Garbage bins and fire escapes. Where secrets come to die in the city's forgotten corners.",
+            "findings": [
+              "Fresh tire marks from a car that left in a hurry - tread pattern matches a 1948 Packard",
+              "A crimson lipstick tube (same shade as the glass upstairs) dropped near the back door - brand is 'Scarlet Siren,' same shade Stella wears",
+              "Witness (homeless man) reports: 'Saw a dame in a fur coat leave through the back around 10:45. She was crying, kept looking back at the door.'",
+              "A spent .38 caliber shell casing in the dumpster, recently fired (same caliber as the murder weapon)",
+              "The homeless man adds: 'That fur coat? White as snow, real fancy. Stood out like a angel in hell.'"
+            ]
+          }
+        ]
+      },
+      {
+        "stage_order": 3,
+        "stage_id": "suspect_interrogation",
+        "objective": "Choose the killer based on Motive, Means, and Opportunity.",
+        "correct_suspect": "Stella Fontaine",
+        "suspect_list": [
+          {
+            "name": "Cora DeVille",
+            "motive": "Vinnie's mistress who was about to be revealed to his wife. The letter suggests he was planning to leave someone for her.",
+            "supporting_fact": "She was seen leaving the scene shaken at 10:40 PM. Her photograph with Vinnie shows a romantic relationship. The perfume scent in the office matches what she wears. However, the timeline shows she left BEFORE the estimated time of death (10:30-10:40 PM), and she wears pink lipstick, not crimson."
+          },
+          {
+            "name": "Jack Halloway",
+            "motive": "Owed Vinnie $5,000 and was threatened with losing his car. Desperate men do desperate things.",
+            "supporting_fact": "The ledger shows 'J.H.' with a massive overdue debt marked 'FINAL WARNING.' He was seen arguing with Vinnie earlier that evening about money. The threatening note could be his handwriting. However, no physical evidence places him at the scene during the murder window, and the glove is clearly a woman's."
+          },
+          {
+            "name": "Dolores Kane",
+            "motive": "Vinnie's wife who may have discovered his affair with Cora and wanted revenge.",
+            "supporting_fact": "She owns a pistol (found in her makeup case). As his wife, she would have easy access to his office and he would trust her enough to turn his back. She wears nude lipstick. However, her pistol was unloaded, and no evidence places her at The Velvet Room that night."
+          },
+          {
+            "name": "Stella Fontaine",
+            "motive": "Star performer who was being replaced by Cora. Professional jealousy turned deadly when Vinnie broke his promise to her.",
+            "supporting_fact": "The silk glove clutched in Vinnie's hand matches the one in her locker. Her diary reveals intense anger at Vinnie and premeditation ('I won't be humiliated again'). Her crimson lipstick was found in the alley, and she wears the same shade found on the glass. She was seen going upstairs at 10:25 PM. A witness saw a woman in a white fur coat—Stella's signature coat—fleeing at 10:45 PM, crying."
+          }
+        ]
+      },
+      {
+        "stage_order": 4,
+        "stage_id": "conclusion",
+        "title": "The Conclusion",
+        "outcome": "Success (Case Closed)",
+        "solution_details": {
+          "killer": "Stella Fontaine",
+          "motive": "Stella Fontaine murdered Vincent Malone out of rage and humiliation. Vinnie had promised her the lead performance slot at The Velvet Room, but instead gave her signature number to Cora DeVille, his new mistress. For a performer whose career was fading, this betrayal was the final insult. She had given Vinnie everything—her talent, her loyalty, even her dignity—and he cast her aside for younger prey. The locked room wasn't magic; Stella simply walked out the front door after shooting Vinnie. He trusted her enough not to suspect danger, and she used that trust to get close. She locked the door from the inside with the key, then slipped it back into his pocket as he lay dying—a final intimate gesture from a woman scorned.",
+          "evidence_correlation": [
+            {
+              "clue": "The silk glove (left hand) clutched in Vinnie's hand matches the right-hand glove found in Stella's locker",
+              "explanation": "These gloves were part of Stella's stage costume. When Vinnie grabbed at her in his final moments, he tore the left glove from her hand. She couldn't retrieve it without risking being caught, so she fled, leaving behind the damning evidence."
+            },
+            {
+              "clue": "The crimson lipstick tube ('Scarlet Siren' brand) found in the back alley matches Stella's signature shade and the lipstick stain on the glass in Vinnie's office",
+              "explanation": "Stella shared a drink with Vinnie before shooting him—the glass with crimson lipstick proves she was in the office. She dropped her lipstick tube while fleeing through the back alley in panic, the same shade that marked the glass. Cora wore pink, and Dolores wore nude tones."
+            },
+            {
+              "clue": "Stella's diary entry: 'He promised me the lead. Now he's giving MY number to that tramp Cora. I won't be humiliated again.'",
+              "explanation": "This entry, written just one day before the murder, establishes clear premeditation. Stella wasn't acting in the heat of passion—she had already decided she 'won't be humiliated again,' showing intent to take action against Vinnie."
+            },
+            {
+              "clue": "The witness saw 'a dame in a fur coat leave through the back around 10:45, crying and looking back' and described it as 'white as snow, real fancy'—matching Stella's signature white fur coat",
+              "explanation": "Stella was known for wearing her signature white fur coat during performances, found hanging in her dressing room area. The timeline places her leaving just after the murder occurred (around 10:30-10:40 PM based on body temperature). She was crying—not from grief, but from the realization of what she'd done."
+            }
+          ]
+        }
+      }
     ]
   }
-];
-
-const suspectsData = [
-  { name: "Vito 'The Hammer' Moretti", motive: "Silence a witness.",kq: "mob", fact: "Pro hit, silenced gun fits the MO for a mob execution." },
-  { name: "Sal 'The Quick' Ricci", motive: "Stolen money revenge.", kq: "money", fact: "Fought with Thorne, suddenly appeared wealthy." },
-  { name: "Ms. Evelyn Reed", motive: "Huge debt collection.", kq: "debt", fact: "Private lender with potential connections to enforce payment violently." },
-  { name: "Mickey", motive: "Jealousy/Control.", kq: "passion", fact: "Quiet killer, obsessed with the necklace/Clara. The jewelry is the key." }
-];
-
-const CORRECT_KILLER = 'Mickey';
+};
 
 export default function App() {
   // --- STATE ---
-  const [stage, setStage] = useState('intro'); // 'intro', 'briefing', 'investigation', 'suspects', 'reveal'
+  const [gameData, setGameData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const [stage, setStage] = useState('intro'); // 'intro', 'briefing', 'evidence_collection', 'suspect_interrogation', 'conclusion'
   const [visitedLocations, setVisitedLocations] = useState([]);
   const [revealedClues, setRevealedClues] = useState([]); 
   
@@ -89,13 +161,46 @@ export default function App() {
   const MZ_IMG_INVESTIGATION = 'https://i.imgur.com/MHfLJSY.png';
   const MZ_IMG_SUSPECTS = 'https://i.imgur.com/aMU7nyM.gif';
   
+  // --- API FETCH ---
+  const fetchGameData = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      // UPDATED FETCH: Uses local proxy path "/api" instead of full URL
+      // This routes through vite.config.js to avoid CORS errors
+      const response = await fetch('/api/games/random', {
+        method: 'GET',
+        headers: {
+          'x-api-key': 'R2Php90kpH5BypjJUxeAW87zL8nMzHvz1TBLJx6N'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Server responded with status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setGameData(data.gameData);
+    } catch (err) {
+      console.warn("API unavailable (running offline mode):", err);
+      // Fail gracefully to fallback data
+      setGameData(FALLBACK_GAME_DATA.gameData);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchGameData();
+  }, []);
+
   const getBg = () => {
     switch(stage) {
       case 'intro': return MZ_IMG_INTRO;
       case 'briefing': return MZ_IMG_BRIEFING;
-      case 'investigation': return MZ_IMG_INVESTIGATION;
-      case 'suspects': return MZ_IMG_SUSPECTS;
-      case 'reveal': return MZ_IMG_BRIEFING;
+      case 'evidence_collection': return MZ_IMG_INVESTIGATION;
+      case 'suspect_interrogation': return MZ_IMG_SUSPECTS;
+      case 'conclusion': return MZ_IMG_BRIEFING;
       default: return MZ_IMG_INTRO;
     }
   };
@@ -122,6 +227,9 @@ export default function App() {
   };
 
   const selectSuspect = (suspectName) => {
+    const suspectStage = gameData.stages.find(s => s.stage_id === 'suspect_interrogation');
+    const CORRECT_KILLER = suspectStage.correct_suspect;
+
     if (suspectName === CORRECT_KILLER) {
       // Victory Calculation
       const baseReward = 50;
@@ -159,7 +267,7 @@ export default function App() {
       setSuspectModal({
         show: true,
         title: "WRONG CALL, DETECTIVE.",
-        message: `You targeted ${suspectName}. The evidence doesn't quite line up. Thorne's last clue points elsewhere. Review the evidence and try again.`,
+        message: `You targeted ${suspectName}. The evidence doesn't quite line up. Review your notes and try again.`,
         correct: false
       });
     }
@@ -167,12 +275,17 @@ export default function App() {
 
   const restartGame = () => {
     setVisitedLocations([]);
-    setRevealedClues([]); // Only reset clues on full game restart
+    setRevealedClues([]); 
     setSuspectModal({ show: false, title: '', message: '', correct: false });
     setEvidenceModal({ show: false, data: null });
     setLastScoreChange(null);
     setStage('intro');
+    // Fetch a new random case on restart
+    fetchGameData();
   };
+
+  // --- DATA HELPERS ---
+  const getStageData = (id) => gameData ? gameData.stages.find(s => s.stage_id === id) : null;
 
   // --- RENDER HELPERS ---
   const styles = `
@@ -182,6 +295,7 @@ export default function App() {
     @keyframes flyUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes scaleIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
     @keyframes glow { 0% { box-shadow: 0 0 5px #FFAC47; } 50% { box-shadow: 0 0 20px #FFAC47; } 100% { box-shadow: 0 0 5px #FFAC47; } }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
     .app-container {
       font-family: 'IBM Plex Mono', monospace;
@@ -341,6 +455,16 @@ export default function App() {
       color: #aaa;
       margin-top: 5px;
     }
+
+    .loader {
+      border: 5px solid rgba(255, 255, 255, 0.1);
+      border-top: 5px solid #FFAC47;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
     
     /* MODALS & CLUE BOXES */
     .modal-backdrop {
@@ -409,6 +533,30 @@ export default function App() {
     }
   `;
 
+  // --- LOADING / ERROR STATES ---
+  if (loading) return (
+    <div className="app-container">
+      <style>{styles}</style>
+      <div className="center-stage">
+        <div className="loader"></div>
+        <h2 style={{color: '#FFAC47'}}>Fetching Case Files...</h2>
+      </div>
+    </div>
+  );
+
+  if (error) return (
+    <div className="app-container">
+      <style>{styles}</style>
+      <div className="center-stage">
+        <h2 style={{color: '#FF3333', marginBottom: '20px'}}>Connection Failed</h2>
+        <p style={{maxWidth: '500px', marginBottom: '30px'}}>{error}</p>
+        <button className="btn" onClick={fetchGameData}>Retry Connection</button>
+      </div>
+    </div>
+  );
+
+  if (!gameData) return null;
+
   return (
     <div className="app-container">
       <style>{styles}</style>
@@ -421,8 +569,9 @@ export default function App() {
         {stage === 'intro' && (
           <div className="center-stage">
             <h1 className="main-title">Case:Zero</h1>
+            <h2 style={{fontSize: '1.8em', marginBottom: '20px', color: '#FFAC47'}}>{gameData.game_title}</h2>
             <p className="subtitle">
-              In the city's shadowed alleys, every whisper hides a lie, every silhouette a secret. Today's case awaits, detective.
+              {gameData.theme}
             </p>
             <div style={{color: '#FFAC47', marginBottom: '20px', fontFamily: 'IBM Plex Mono', fontSize: '1.1em'}}>
               Current Rating: {score} (Lead Investigator)
@@ -434,160 +583,168 @@ export default function App() {
         )}
 
         {/* --- BRIEFING STAGE --- */}
-        {stage === 'briefing' && (
-          <div className="center-stage" style={{ height: 'auto', paddingTop: '50px' }}>
-            <div className="title-bar">
-              <h1>The Case of the Silver Serpent 🕵️</h1>
-            </div>
-            <div className="case-file">
-              <h2>Case Briefing: Elias Thorne</h2>
-              <p>The <i>Rain 🌧️ </i>is a cruel curtain over the city. Detective Murphy from Homicide is sitting opposite you.</p>
-              <p>"The victim is <i>Elias 'The Serpent' 🐍 Thorne</i>. Mob bookie. Found him in his penthouse. One shot, clean and quiet. Looks professional, but his safe is untouched. The only thing we found? He was clutching a sliver of broken metal: a <i>silver earring 👂</i>."</p>
+        {stage === 'briefing' && (() => {
+          const briefingData = getStageData('briefing').display_data;
+          return (
+            <div className="center-stage" style={{ height: 'auto', paddingTop: '50px' }}>
+              <div className="title-bar">
+                <h1>{briefingData.header}</h1>
+              </div>
+              <div className="case-file">
+                <p>{briefingData.atmosphere_intro}</p>
+                <p>{briefingData.partner_dialogue}</p>
 
-              <h3>Initial Clues</h3>
-              <ul>
-                  <li><strong>Victim:</strong> Elias 'The Serpent' Thorne 🐍</li>
-                  <li><strong>Cause of Death:</strong> Single, silenced shot 🔫</li>
-                  <li><strong>Initial Clue:</strong> A broken silver earring 👂</li>
-                  <li><strong>Complication:</strong> Thorne was set to betray Vito 'The Hammer' Moretti 🔨</li>
-              </ul>
+                <h3>Initial Clues</h3>
+                <ul>
+                    <li><strong>Victim:</strong> {briefingData.quick_facts.victim}</li>
+                    <li><strong>Cause of Death:</strong> {briefingData.quick_facts.cause_of_death}</li>
+                    <li><strong>Initial Clue:</strong> {briefingData.quick_facts.initial_clue}</li>
+                    <li><strong>Complication:</strong> {briefingData.quick_facts.complication}</li>
+                </ul>
+              </div>
+              <button className="btn" style={{ marginBottom: '50px' }} onClick={() => handleSetStage('evidence_collection')}>Start Investigation</button>
             </div>
-            <button className="btn" style={{ marginBottom: '50px' }} onClick={() => handleSetStage('investigation')}>Start Investigation</button>
-          </div>
-        )}
+          );
+        })()}
 
         {/* --- INVESTIGATION STAGE --- */}
-        {stage === 'investigation' && (
-          <div className="container" style={{ marginTop: '50px' }}>
-            <div className="title-bar">
-              <h1>Stage 2: Evidence Collection 🔎</h1>
-            </div>
-            
-            {/* Added Counter and Button Container */}
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '20px', marginBottom: '20px', flexWrap: 'wrap' }}>
-              <div style={{ fontSize: '1.2em', color: '#FFAC47', fontWeight: 'bold' }}>
-                LOCATIONS VISITED: {visitedLocations.length} 📍
+        {stage === 'evidence_collection' && (() => {
+           const evidenceStage = getStageData('evidence_collection');
+           return (
+            <div className="container" style={{ marginTop: '50px' }}>
+              <div className="title-bar">
+                <h1>Stage 2: Evidence Collection 🔎</h1>
               </div>
-              <div style={{ fontSize: '1.2em', color: '#FFAC47', fontWeight: 'bold' }}>
-                CLUES EXAMINED: {revealedClues.length} 🔍
-              </div>
-              <button className="btn" style={{ marginTop: 0, padding: '12px 20px', fontSize: '1em' }} onClick={() => handleSetStage('suspects')}>
-                Proceed to Suspects 🤔
-              </button>
-            </div>
-
-            <p className="instruction">The city is a puzzle box. Visit these locations to find the clues.</p>
-            
-            <div className="grid">
-              {locationsData.map((loc, i) => (
-                <div 
-                  key={loc.id}
-                  className={`card ${visitedLocations.includes(loc.id) ? 'visited' : ''}`}
-                  style={{ animationDelay: `${i * 0.1}s` }}
-                  onClick={() => openEvidence(loc)}
-                >
-                  <h3>{loc.title}</h3>
-                  <p>{loc.setting.substring(0, 60)}...</p>
+              
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '20px', marginBottom: '20px', flexWrap: 'wrap' }}>
+                <div style={{ fontSize: '1.2em', color: '#FFAC47', fontWeight: 'bold' }}>
+                  LOCATIONS VISITED: {visitedLocations.length} 📍
                 </div>
-              ))}
+                <div style={{ fontSize: '1.2em', color: '#FFAC47', fontWeight: 'bold' }}>
+                  CLUES EXAMINED: {revealedClues.length} 🔍
+                </div>
+                <button className="btn" style={{ marginTop: 0, padding: '12px 20px', fontSize: '1em' }} onClick={() => handleSetStage('suspect_interrogation')}>
+                  Proceed to Suspects 🤔
+                </button>
+              </div>
+
+              <p className="instruction">{evidenceStage.description}</p>
+              
+              <div className="grid">
+                {evidenceStage.locations.map((loc, i) => (
+                  <div 
+                    key={loc.id}
+                    className={`card ${visitedLocations.includes(loc.id) ? 'visited' : ''}`}
+                    style={{ animationDelay: `${i * 0.1}s` }}
+                    onClick={() => openEvidence(loc)}
+                  >
+                    <h3>{loc.name}</h3>
+                    <p>{loc.description.substring(0, 60)}...</p>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* --- SUSPECTS STAGE --- */}
-        {stage === 'suspects' && (
-          <div className="container" style={{ marginTop: '50px' }}>
-            <div className="title-bar">
-              <h1>Stage 3: The Suspects 👥</h1>
-            </div>
-
-            {/* Counters added here */}
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '20px', marginBottom: '20px', flexWrap: 'wrap' }}>
-              <div style={{ fontSize: '1.2em', color: '#FFAC47', fontWeight: 'bold' }}>
-                LOCATIONS VISITED: {visitedLocations.length} 📍
+        {stage === 'suspect_interrogation' && (() => {
+          const suspectStage = getStageData('suspect_interrogation');
+          return (
+            <div className="container" style={{ marginTop: '50px' }}>
+              <div className="title-bar">
+                <h1>Stage 3: {suspectStage.objective}</h1>
               </div>
-              <div style={{ fontSize: '1.2em', color: '#FFAC47', fontWeight: 'bold' }}>
-                CLUES EXAMINED: {revealedClues.length} 🔍
-              </div>
-            </div>
 
-            <p className="instruction">Time to choose the killer based on Motive, Means, and Opportunity.</p>
-
-            {/* Back Button */}
-            <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-              <button className="btn" style={{ padding: '12px 25px', fontSize: '1em' }} onClick={() => handleSetStage('investigation')}>
-                ← Back to Investigation
-              </button>
-            </div>
-
-            <div className="grid">
-              {suspectsData.map((suspect, i) => (
-                <div 
-                  key={i}
-                  className="card suspect-card"
-                  style={{ animationDelay: `${i * 0.2}s` }}
-                  onClick={() => selectSuspect(suspect.name)}
-                >
-                  <h3>{suspect.name}</h3>
-                  <p><strong>Motive:</strong> {suspect.motive}</p>
-                  <p className="fact">Fact: {suspect.fact}</p>
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '20px', marginBottom: '20px', flexWrap: 'wrap' }}>
+                <div style={{ fontSize: '1.2em', color: '#FFAC47', fontWeight: 'bold' }}>
+                  LOCATIONS VISITED: {visitedLocations.length} 📍
                 </div>
-              ))}
+                <div style={{ fontSize: '1.2em', color: '#FFAC47', fontWeight: 'bold' }}>
+                  CLUES EXAMINED: {revealedClues.length} 🔍
+                </div>
+              </div>
+
+              <p className="instruction">Review your findings and accuse the killer.</p>
+
+              <div style={{ textAlign: 'center', marginBottom: '30px' }}>
+                <button className="btn" style={{ padding: '12px 25px', fontSize: '1em' }} onClick={() => handleSetStage('evidence_collection')}>
+                  ← Back to Investigation
+                </button>
+              </div>
+
+              <div className="grid">
+                {suspectStage.suspect_list.map((suspect, i) => (
+                  <div 
+                    key={i}
+                    className="card suspect-card"
+                    style={{ animationDelay: `${i * 0.2}s` }}
+                    onClick={() => selectSuspect(suspect.name)}
+                  >
+                    <h3>{suspect.name}</h3>
+                    <p><strong>Motive:</strong> {suspect.motive}</p>
+                    <p className="fact">Fact: {suspect.supporting_fact}</p>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* --- REVEAL STAGE --- */}
-        {stage === 'reveal' && (
-          <div className="center-stage" style={{ height: 'auto', paddingTop: '50px' }}>
-            <div className="title-bar">
-              <h1>The Conclusion</h1>
+        {stage === 'conclusion' && (() => {
+          const conclusionData = getStageData('conclusion').solution_details;
+          return (
+            <div className="center-stage" style={{ height: 'auto', paddingTop: '50px' }}>
+              <div className="title-bar">
+                <h1>The Conclusion</h1>
+              </div>
+              <div className="reveal-box">
+                <div style={{ fontStyle: 'italic', marginBottom: '20px', textAlign: 'center' }}>"Success. The truth always surfaces eventually."</div>
+                
+                <div style={{ margin: '20px 0', fontSize: '1.5em', display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '10px' }}>
+                  <span title="Locations Visited">{Array(visitedLocations.length).fill('📍').join('')}</span>
+                  <span title="Clues Found">{Array(revealedClues.length).fill('🔎').join('')}</span>
+                </div>
+
+                <div className="score-badge">
+                  <div style={{fontSize: '1.3em', fontWeight: 'bold'}}>🛡️ Rank: Lead Investigator</div>
+                  <div style={{fontSize: '1.5em', margin: '10px 0'}}>Final Rating: {score}</div>
+                  {lastScoreChange && lastScoreChange.type === 'win' && (
+                    <div className="score-detail">
+                      <div>Base Reward: +{lastScoreChange.base}</div>
+                      <div>Efficiency Bonus: +{lastScoreChange.bonus} ({lastScoreChange.cluesUsed} clues used)</div>
+                      <div style={{color: '#4CAF50', fontWeight: 'bold'}}>Total Earned: +{lastScoreChange.amount}</div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="killer-name">THE KILLER IS: {conclusionData.killer.toUpperCase()}</div>
+                
+                <h3>Motive</h3>
+                <p style={{ textAlign: 'center', marginBottom: '20px' }}>{conclusionData.motive}</p>
+                
+                <h3>Evidence Correlation</h3>
+                <ul className="evidence-list">
+                  {conclusionData.evidence_correlation.map((item, index) => (
+                    <li key={index}>
+                      <strong>{item.clue}</strong><br/>
+                      <span style={{color: '#aaa', display: 'block', marginTop: '5px'}}>⤷ {item.explanation}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <div style={{ marginTop: '40px', fontSize: '1.2em', textAlign: 'center', color: '#ddd' }}>
+                  <i>The city sleeps a little sounder tonight, Detective.</i> 🕵️‍♂️
+                </div>
+
+                <div style={{ textAlign: 'center', marginTop: '30px' }}>
+                  <button className="btn" onClick={restartGame}>Start New Case</button>
+                </div>
+              </div>
             </div>
-            <div className="reveal-box">
-              <div style={{ fontStyle: 'italic', marginBottom: '20px', textAlign: 'center' }}>"Success. The truth always surfaces eventually."</div>
-              
-              {/* Investigation Stats Moved Here */}
-              <div style={{ margin: '20px 0', fontSize: '1.5em', display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '10px' }}>
-                 <span title="Locations Visited">{Array(visitedLocations.length).fill('📍').join('')}</span>
-                 <span title="Clues Found">{Array(revealedClues.length).fill('🔎').join('')}</span>
-              </div>
-
-              {/* MISSION REPORT (Rank & Score) */}
-              <div className="score-badge">
-                <div style={{fontSize: '1.3em', fontWeight: 'bold'}}>🛡️ Rank: Lead Investigator</div>
-                <div style={{fontSize: '1.5em', margin: '10px 0'}}>Current Rating: {score}</div>
-                {lastScoreChange && lastScoreChange.type === 'win' && (
-                  <div className="score-detail">
-                    <div>Base Reward: +{lastScoreChange.base}</div>
-                    <div>Efficiency Bonus: +{lastScoreChange.bonus} ({lastScoreChange.cluesUsed} clues used)</div>
-                    <div style={{color: '#4CAF50', fontWeight: 'bold'}}>Total Earned: +{lastScoreChange.amount}</div>
-                    <div style={{marginTop: '10px', fontSize: '0.8em'}}>Next Rank: Sherlock (at 3000)</div>
-                  </div>
-                )}
-              </div>
-
-              <div className="killer-name">THE KILLER IS: MICKEY</div>
-              
-              <h3>Motive: Passion and Greed</h3>
-              <p style={{ textAlign: 'center', marginBottom: '20px' }}>(Wanted the jewelry/hated Thorne)</p>
-              
-              <ul className="evidence-list">
-                <li><strong>Matchbook:</strong> Places Mickey (smoker) at the scene.</li>
-                <li><strong>Earring:</strong> Matches the set Thorne gave Clara.</li>
-                <li><strong>No forced entry:</strong> Mickey stole Clara's key.</li>
-                <li><strong>Stalker Report:</strong> Confirms Mickey's obsession.</li>
-              </ul>
-
-              <div style={{ marginTop: '40px', fontSize: '1.2em', textAlign: 'center', color: '#ddd' }}>
-                <i>The city sleeps a little sounder tonight, Detective.</i> 🕵️‍♂️
-              </div>
-
-              <div style={{ textAlign: 'center', marginTop: '30px' }}>
-                <button className="btn" onClick={restartGame}>Start New Case</button>
-              </div>
-            </div>
-          </div>
-        )}
+          );
+        })()}
       </div>
 
       {/* --- EVIDENCE MODAL --- */}
@@ -595,8 +752,8 @@ export default function App() {
         <div className="modal-backdrop" onClick={() => setEvidenceModal({ show: false, data: null })}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <span className="close-btn" onClick={() => setEvidenceModal({ show: false, data: null })}>&times;</span>
-            <h2 style={{ color: '#FFAC47' }}>{evidenceModal.data.title}</h2>
-            <p>{evidenceModal.data.setting}</p>
+            <h2 style={{ color: '#FFAC47' }}>{evidenceModal.data.name}</h2>
+            <p>{evidenceModal.data.description}</p>
             <h3 style={{ marginTop: '20px', color: '#FFAC47' }}>Findings</h3>
             <ul className="clue-list">
               {evidenceModal.data.findings.map((finding, idx) => {
@@ -628,7 +785,6 @@ export default function App() {
             <h2>{suspectModal.title}</h2>
             <p>{suspectModal.message}</p>
             
-            {/* Penalty Feedback */}
             {!suspectModal.correct && (
               <div style={{margin: '15px 0', color: '#FF3333'}}>
                 <div style={{fontWeight: 'bold', fontSize: '1.2em'}}>RATING PENALTY: -25</div>
@@ -637,7 +793,7 @@ export default function App() {
             )}
 
             {suspectModal.correct ? (
-              <button className="btn" onClick={() => { setSuspectModal({ ...suspectModal, show: false }); handleSetStage('reveal'); }}>View Conclusion</button>
+              <button className="btn" onClick={() => { setSuspectModal({ ...suspectModal, show: false }); handleSetStage('conclusion'); }}>View Conclusion</button>
             ) : (
               <button className="btn" onClick={() => setSuspectModal({ ...suspectModal, show: false })}>Try Again</button>
             )}
