@@ -150,19 +150,33 @@ const FALLBACK_GAME_DATA = {
   }
 };
 
+// --- FAKE HIGH SCORES ---
+const FAKE_HIGH_SCORES = [
+  { name: "Sherlock H.", score: 2450 },
+  { name: "Hercule P.", score: 2300 },
+  { name: "Nancy D.", score: 2150 },
+  { name: "Columbo", score: 1900 },
+  { name: "Benoit B.", score: 1850 },
+  { name: "Miss Marple", score: 1780 },
+  { name: "Batman", score: 1700 }
+];
+
 export default function App() {
   // --- STATE ---
   const [gameData, setGameData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const [stage, setStage] = useState('intro'); // 'intro', 'briefing', 'evidence_collection', 'suspect_interrogation', 'conclusion'
+  const [stage, setStage] = useState('intro'); // 'intro', 'briefing', 'evidence_collection', 'suspect_interrogation', 'conclusion', 'highscore'
   const [visitedLocations, setVisitedLocations] = useState([]);
   const [revealedClues, setRevealedClues] = useState([]); 
   
   // Scoring State
   const [score, setScore] = useState(1500);
   const [lastScoreChange, setLastScoreChange] = useState(null); // { type: 'win'|'loss', amount, bonus, cluesUsed }
+
+  // User Menu State
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   // Modals
   const [evidenceModal, setEvidenceModal] = useState({ show: false, data: null });
@@ -188,7 +202,10 @@ export default function App() {
     try {
       // UPDATED FETCH: Uses local proxy path "/api" instead of full URL
       // This routes through vite.config.js to avoid CORS errors
-      const response = await fetch('/api/games/random', {
+      const MZ_IMG_API = '/api/games/random'; 
+      // Note: In this specific preview environment, this fetch will fail (404)
+      // because there is no Vite proxy running. It will trigger the catch block below.
+      const response = await fetch(MZ_IMG_API, {
         method: 'GET',
         headers: {
           'x-api-key': import.meta.env.VITE_API_KEY
@@ -221,6 +238,7 @@ export default function App() {
       case 'evidence_collection': return MZ_IMG_INVESTIGATION;
       case 'suspect_interrogation': return MZ_IMG_SUSPECTS;
       case 'conclusion': return MZ_IMG_BRIEFING;
+      case 'highscore': return MZ_IMG_INTRO;
       default: return MZ_IMG_INTRO;
     }
   };
@@ -244,6 +262,10 @@ export default function App() {
     if (!revealedClues.includes(clueId)) {
       setRevealedClues([...revealedClues, clueId]);
     }
+  };
+
+  const toggleUserMenu = () => {
+    setUserMenuOpen(!userMenuOpen);
   };
 
   const selectSuspect = (suspectName) => {
@@ -302,6 +324,7 @@ export default function App() {
     setSuspectModal({ show: false, title: '', message: '', correct: false, isGameOver: false });
     setEvidenceModal({ show: false, data: null });
     setClueBoardOpen(false);
+    setUserMenuOpen(false);
     setLastScoreChange(null);
     setStage('intro');
     // Fetch a new random case on restart
@@ -361,6 +384,88 @@ export default function App() {
           flex-direction: column;
           align-items: center;
         }
+
+        /* --- USER MENU STYLES --- */
+        .user-menu-container {
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          z-index: 1000;
+        }
+
+        .user-avatar-btn {
+          width: 60px;
+          height: 60px;
+          border-radius: 50%;
+          border: 3px solid #FFAC47;
+          overflow: hidden;
+          cursor: pointer;
+          box-shadow: 0 0 15px rgba(0,0,0,0.8);
+          transition: transform 0.2s, box-shadow 0.2s;
+          background: #000;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+        
+        .user-avatar-btn:hover { 
+          transform: scale(1.1); 
+          border-color: #fff; 
+          box-shadow: 0 0 25px rgba(255,172,71,0.6);
+        }
+
+        .user-dropdown {
+          position: absolute;
+          top: 75px;
+          right: 0;
+          width: 250px;
+          background: rgba(26, 35, 58, 0.95);
+          border: 2px solid #FFAC47;
+          padding: 20px;
+          color: #f0f0f0;
+          box-shadow: 0 10px 30px rgba(0,0,0,0.9);
+          text-align: left;
+          animation: scaleIn 0.2s ease-out;
+          transform-origin: top right;
+          border-radius: 4px;
+        }
+
+        .user-dropdown h3 { 
+          color: #FFAC47; 
+          margin-top: 0; 
+          border-bottom: 1px solid #555; 
+          padding-bottom: 10px; 
+          margin-bottom: 15px;
+          font-family: 'Cinzel Decorative', cursive;
+        }
+
+        /* NEW STYLE FOR PROFILE IMAGE IN DROPDOWN - WIDTH ADJUSTED */
+        .profile-dropdown-img {
+          width: 95%; /* Set to 95% of container width */
+          height: 150px; /* Adjusted height for landscape/banner look */
+          object-fit: cover;
+          border-radius: 5px; 
+          border: 2px solid #FFAC47;
+          display: block;
+          margin: 0 auto 15px auto;
+          box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        .stat-row { 
+          display: flex; 
+          justify-content: space-between; 
+          margin: 12px 0; 
+          font-size: 0.95em; 
+          border-bottom: 1px dashed #444;
+          padding-bottom: 5px;
+        }
+        
+        .stat-row:last-child {
+          border-bottom: none;
+        }
+
+        .stat-label { color: #aaa; }
+        .stat-value { color: #fff; font-weight: bold; }
 
         h1, h2, h3 {
           font-family: 'Cinzel Decorative', cursive;
@@ -489,6 +594,41 @@ export default function App() {
           height: 50px;
           animation: spin 1s linear infinite;
           margin-bottom: 20px;
+        }
+        
+        /* HIGH SCORE STYLES */
+        .highscore-table {
+          width: 100%;
+          max-width: 600px;
+          border-collapse: collapse;
+          margin: 20px auto;
+          font-family: 'IBM Plex Mono', monospace;
+          background: rgba(0, 0, 0, 0.8);
+          border: 2px solid #FFAC47;
+          box-shadow: 0 0 20px rgba(0, 0, 0, 0.7);
+        }
+
+        .highscore-table th, .highscore-table td {
+          padding: 15px;
+          text-align: left;
+          border-bottom: 1px solid #444;
+        }
+
+        .highscore-table th {
+          background: rgba(255, 172, 71, 0.1);
+          color: #FFAC47;
+          font-weight: bold;
+          text-transform: uppercase;
+        }
+
+        .highscore-table tr.current-player {
+          background: rgba(76, 175, 80, 0.2);
+          border-left: 4px solid #4CAF50;
+        }
+
+        .highscore-table tr.current-player td {
+          font-weight: bold;
+          color: #fff;
         }
         
         /* MODALS & CLUE BOXES */
@@ -690,6 +830,42 @@ export default function App() {
           <div className="background-fixed" style={{ backgroundImage: `url('${getBg()}')` }}></div>
           <div className="overlay"></div>
 
+          {/* --- USER MENU (PERSISTENT TOP RIGHT) --- */}
+          <div className="user-menu-container">
+            <div className="user-avatar-btn" onClick={toggleUserMenu} title="Investigator Profile">
+              <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#FFAC47" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+            </div>
+            {userMenuOpen && (
+              <div className="user-dropdown">
+                <h3>Detective Profile</h3>
+                <img src="https://i.imgur.com/afKPe0x.png" alt="Profile" className="profile-dropdown-img" />
+                <div className="stat-row">
+                  <span className="stat-label">Investigator</span>
+                  <span className="stat-value" style={{color: '#FFAC47'}}>Tobias</span>
+                </div>
+                <div className="stat-row">
+                  <span className="stat-label">Rank</span>
+                  <span className="stat-value">Lead Investigator</span>
+                </div>
+                <div className="stat-row">
+                  <span className="stat-label">Global Ranking</span>
+                  <span className="stat-value" style={{color: '#FFAC47'}}>#123</span>
+                </div>
+                <div className="stat-row">
+                  <span className="stat-label">Current Points</span>
+                  <span className="stat-value" style={{color: '#4CAF50'}}>{score}</span>
+                </div>
+                <div className="stat-row">
+                  <span className="stat-label">Badges</span>
+                  <span className="stat-value">🦅 ⚖️ 🔦</span>
+                </div>
+              </div>
+            )}
+          </div>
+
           <div className="content-wrapper">
             {/* --- INTRO STAGE --- */}
             {stage === 'intro' && (
@@ -699,9 +875,7 @@ export default function App() {
                 <p className="subtitle">
                   {gameData.theme}
                 </p>
-                <div style={{color: '#FFAC47', marginBottom: '20px', fontFamily: 'IBM Plex Mono', fontSize: '1.1em'}}>
-                  Current Rating: {score} (Lead Investigator)
-                </div>
+                {/* Removed the rank display here since it is now in the top right menu */}
                 <button className="btn" style={{animation: 'fadeIn 1s ease-out 2s backwards'}} onClick={() => handleSetStage('briefing')}>
                   Begin Investigation
                 </button>
@@ -883,6 +1057,80 @@ export default function App() {
                     </div>
 
                     <div style={{ textAlign: 'center', marginTop: '30px' }}>
+                      <button className="btn" onClick={() => handleSetStage('highscore')}>Proceed</button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* --- HIGH SCORE STAGE --- */}
+            {stage === 'highscore' && (() => {
+              // Construct specific display list per user request
+              const top3 = FAKE_HIGH_SCORES.slice(0, 3).map((s, i) => ({ ...s, rank: i + 1 }));
+              
+              const rank122 = { 
+                name: "Insp. Clouseau", 
+                score: score + 120, // Arbitrary score higher than player
+                rank: 122 
+              };
+
+              const playerEntry = { 
+                name: "Tobias (YOU)", 
+                score: score, 
+                rank: 123, 
+                isPlayer: true 
+              };
+
+              const displayList = [
+                ...top3,
+                { spacer: true },
+                rank122,
+                playerEntry
+              ];
+
+              return (
+                <div className="center-stage" style={{ height: 'auto', paddingTop: '50px' }}>
+                  <div className="title-bar">
+                    <h1>Detective Rankings</h1>
+                  </div>
+                  
+                  <div className="reveal-box" style={{ maxWidth: '700px' }}>
+                    <p style={{textAlign: 'center', color: '#aaa', fontStyle: 'italic', marginBottom: '30px'}}>
+                      Top investigators from across the precinct.
+                    </p>
+
+                    <table className="highscore-table">
+                      <thead>
+                        <tr>
+                          <th style={{width: '60px'}}>#</th>
+                          <th>Detective</th>
+                          <th style={{textAlign: 'right'}}>Score</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {displayList.map((entry, idx) => {
+                          if (entry.spacer) {
+                             return (
+                               <tr key="spacer" style={{background: 'transparent', border: 'none'}}>
+                                 <td colSpan="3" style={{textAlign: 'center', fontSize: '1.5em', letterSpacing: '5px', padding: '10px 0', color: '#666'}}>
+                                   . . .
+                                 </td>
+                               </tr>
+                             );
+                          }
+                          return (
+                            <tr key={idx} className={entry.isPlayer ? 'current-player' : ''}>
+                              <td>{entry.rank}</td>
+                              <td>{entry.name}</td>
+                              <td style={{textAlign: 'right'}}>{entry.score}</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+
+                    <div style={{ textAlign: 'center', marginTop: '40px' }}>
                       <button className="btn" onClick={restartGame}>Start New Case</button>
                     </div>
                   </div>
