@@ -11,9 +11,8 @@ This is a simple GitHub Pages site built using Markdown.
 
 ## 📚 Sections
 
-- [About](about.md)
-- [Projects](projects.md)
-- [Notes](notes.md)
+- [EKS Authentication](k8s.md)
+
 
 ---
 
